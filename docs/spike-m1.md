@@ -99,6 +99,8 @@ Arayüz değişikliklerini 4 pencere açmadan kontrol etmek için. Kullanımı d
 
 1. `git pull` yap. Eklentinin DLL dosyaları **Git LFS** ile geliyor. `git lfs install` bir kez yapılmış olmalı (README).
    Yapılmadıysa DLL'ler küçük işaretçi dosyaları olarak iner ve lobi "GodotSteam eklentisi yüklenemedi" der.
+   Çözüm: repo klasöründe `git lfs install`, ardından `git lfs pull`, sonra Godot'u yeniden aç.
+   Kontrol: `game\addons\godotsteam\win64\steam_api64.dll` yaklaşık 310 KB olmalı, 1 KB değil.
 2. Godot projeyi açarken yeni eklentiyi fark edip editörü **yeniden başlatmanı** isteyebilir; kabul et.
    İstemezse ve hata görürsen **Project → Reload Current Project**.
 
