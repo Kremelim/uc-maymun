@@ -19,6 +19,7 @@ var last_message := ""
 var auto_connect_used := false
 
 var _is_host := false
+var _hosting_via_steam := false
 var _pending_name := ""
 
 
@@ -29,6 +30,9 @@ func _ready() -> void:
 	multiplayer.connected_to_server.connect(_on_connected_to_server)
 	multiplayer.connection_failed.connect(_on_connection_failed)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
+	SteamService.lobby_ready.connect(_on_steam_lobby_ready)
+	SteamService.lobby_entered.connect(_on_steam_lobby_entered)
+	SteamService.lobby_failed.connect(_on_steam_lobby_failed)
 	if CmdArgs.has_flag("--e2e"):
 		var probe: Node = load("res://tests/e2e/e2e_probe.gd").new()
 		probe.name = "E2EProbe"
@@ -49,27 +53,35 @@ func local_seat() -> int:
 	return seat_of(multiplayer.get_unique_id())
 
 
-func host_game(player_name: String, port: int) -> bool:
-	var peer := PeerFactory.create_host(port, Session.RULES.max_players - 1)
+func host_lan_game(player_name: String, port: int) -> bool:
+	var peer := PeerFactory.create_enet_host(port, Session.RULES.max_players - 1)
 	if peer == null:
 		connection_failed.emit("Port %d açılamadı." % port)
 		return false
-	multiplayer.multiplayer_peer = peer
-	_is_host = true
-	roster = {1: {"name": _clean_name(player_name), "seat": 0}}
-	roster_changed.emit(roster)
+	_host_with(peer, player_name)
 	return true
 
 
-func join_game(address: String, port: int, player_name: String) -> bool:
-	var peer := PeerFactory.create_client(address, port)
+func join_lan_game(address: String, port: int, player_name: String) -> bool:
+	var peer := PeerFactory.create_enet_client(address, port)
 	if peer == null:
 		connection_failed.emit("%s:%d adresine bağlanılamadı." % [address, port])
 		return false
-	multiplayer.multiplayer_peer = peer
-	_is_host = false
-	_pending_name = _clean_name(player_name)
+	_join_with(peer, player_name)
 	return true
+
+
+## Creates a friends-only Steam lobby; hosting starts once Steam confirms it (_on_steam_lobby_ready).
+func host_steam_game(player_name: String) -> void:
+	_pending_name = player_name
+	_hosting_via_steam = true
+	SteamService.create_lobby(Session.RULES.max_players)
+
+
+## Joins by lobby code; invites accepted in Steam arrive through _on_steam_lobby_entered too.
+func join_steam_lobby(lobby_id: int, player_name: String) -> void:
+	_pending_name = player_name
+	SteamService.join_lobby(lobby_id)
 
 
 ## Host only. Seats are packed to 0..n-1 first so the rules engine sees contiguous seats.
@@ -77,6 +89,7 @@ func start_game() -> void:
 	if not _is_host or game_in_progress or roster.size() < Session.RULES.min_players:
 		return
 	game_in_progress = true
+	SteamService.set_lobby_joinable(false)
 	var peers: Array = roster.keys()
 	peers.sort_custom(func(a: int, b: int) -> bool: return roster[a]["seat"] < roster[b]["seat"])
 	for i in peers.size():
@@ -90,7 +103,9 @@ func start_game() -> void:
 func leave(message: String = "") -> void:
 	multiplayer.multiplayer_peer.close()
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
+	SteamService.leave_lobby()
 	_is_host = false
+	_hosting_via_steam = false
 	roster = {}
 	game_in_progress = false
 	last_message = message
@@ -137,6 +152,8 @@ func _start_game() -> void:
 @rpc("authority", "call_local", "reliable")
 func _abort_game(reason: String) -> void:
 	game_in_progress = false
+	if _is_host:
+		SteamService.set_lobby_joinable(true)
 	last_message = reason
 	Session.reset()
 	get_tree().change_scene_to_file(LOBBY_SCENE)
@@ -166,6 +183,50 @@ func _on_connection_failed() -> void:
 func _on_server_disconnected() -> void:
 	disconnected.emit("Host masadan kalktı.")
 	leave("Host masadan kalktı.")
+
+
+func _host_with(peer: MultiplayerPeer, player_name: String) -> void:
+	multiplayer.multiplayer_peer = peer
+	_is_host = true
+	roster = {1: {"name": _clean_name(player_name), "seat": 0}}
+	roster_changed.emit(roster)
+
+
+func _join_with(peer: MultiplayerPeer, player_name: String) -> void:
+	multiplayer.multiplayer_peer = peer
+	_is_host = false
+	_pending_name = _clean_name(player_name)
+
+
+func _on_steam_lobby_ready(_lobby_id: int) -> void:
+	if not _hosting_via_steam:
+		return
+	var peer := PeerFactory.create_steam_host()
+	if peer == null:
+		connection_failed.emit("Steam masası kurulamadı.")
+		SteamService.leave_lobby()
+		_hosting_via_steam = false
+		return
+	_host_with(peer, _pending_name)
+
+
+func _on_steam_lobby_entered(_lobby_id: int, owner_steam_id: int) -> void:
+	if not roster.is_empty():
+		# Already at a table (e.g. accepted another invite mid-game): stay where we are.
+		SteamService.leave_lobby()
+		return
+	var peer := PeerFactory.create_steam_client(owner_steam_id)
+	if peer == null:
+		connection_failed.emit("Steam masasına bağlanılamadı.")
+		SteamService.leave_lobby()
+		return
+	# Invites accepted in Steam come without a typed name, so fall back to the Steam name.
+	_join_with(peer, _pending_name if _pending_name != "" else SteamService.persona_name)
+
+
+func _on_steam_lobby_failed(reason: String) -> void:
+	_hosting_via_steam = false
+	connection_failed.emit(reason)
 
 
 func _free_seat() -> int:

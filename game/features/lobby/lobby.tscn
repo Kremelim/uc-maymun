@@ -20,7 +20,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="VBox" type="VBoxContainer" parent="Center"]
-custom_minimum_size = Vector2(380, 0)
+custom_minimum_size = Vector2(420, 0)
 layout_mode = 2
 theme_override_constants/separation = 10
 
@@ -35,6 +35,57 @@ unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "Adın"
 
+[node name="SteamStatusLabel" type="Label" parent="Center/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Steam kontrol ediliyor…"
+autowrap_mode = 3
+
+[node name="SteamSection" type="VBoxContainer" parent="Center/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SteamButtons" type="HBoxContainer" parent="Center/VBox/SteamSection"]
+layout_mode = 2
+
+[node name="SteamHostButton" type="Button" parent="Center/VBox/SteamSection/SteamButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Steam masası kur"
+
+[node name="InviteButton" type="Button" parent="Center/VBox/SteamSection/SteamButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Arkadaş davet et"
+
+[node name="CodeRow" type="HBoxContainer" parent="Center/VBox/SteamSection"]
+layout_mode = 2
+
+[node name="LobbyCodeEdit" type="LineEdit" parent="Center/VBox/SteamSection/CodeRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Lobi kodu"
+
+[node name="JoinCodeButton" type="Button" parent="Center/VBox/SteamSection/CodeRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Kodla katıl"
+
+[node name="CopyCodeButton" type="Button" parent="Center/VBox/SteamSection/CodeRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Kodu kopyala"
+
+[node name="Separator" type="HSeparator" parent="Center/VBox"]
+layout_mode = 2
+
+[node name="LanLabel" type="Label" parent="Center/VBox"]
+layout_mode = 2
+text = "Yerel ağ (aynı bilgisayar / aynı ev)"
+
 [node name="AddressEdit" type="LineEdit" parent="Center/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -48,13 +99,13 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Masa kur (host)"
+text = "Masa kur (yerel)"
 
 [node name="JoinButton" type="Button" parent="Center/VBox/Buttons"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Masaya katıl"
+text = "Masaya katıl (yerel)"
 
 [node name="PlayersLabel" type="Label" parent="Center/VBox"]
 unique_name_in_owner = true

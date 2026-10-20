@@ -21,7 +21,8 @@
 
 - Faz 1: konsept + kağıt prototip (`docs/gdd/kurallar-v0.1.md`).
 - Motor: ADR-0001 önerildi (Godot 4.7, teknik spike'a bağlı).
-- M1 spike: Bölüm A (yerel ağ, gizli gelir, beyan) çalışıyor ve testli. Sırada Bölüm B (Steam). Bkz. `docs/spike-m1.md`.
+- M1 spike: Bölüm A (yerel ağ, gizli gelir, beyan) çalışıyor; Kerem 4 pencereyle Windows'ta doğruladı.
+  Bölüm B: Steam lobi kodu yazıldı, Windows'ta test bekliyor (B1 tek başına, B2 arkadaşla). Sonra B3: ses. Bkz. `docs/spike-m1.md`.
 - Takvim: sabit tarih yok; kilometre taşlarıyla ilerleniyor (`docs/yol-haritasi.md`).
 
 ## Geliştirme ortamı
@@ -29,7 +30,11 @@
 - Ekip Windows kullanıyor. Godot sürümü: **4.7.2-stable** (herkes aynı sürümü kullanır).
 - Claude'un bulut oturumunda Godot 4.7.2 ekransız (`--headless`) çalışıyor. Testler ve simülasyonlar orada koşturulur.
 - Steam'e bağlı her şey (lobi, ses, overlay) sadece ekibin Windows makinelerinde test edilebilir.
+- GodotSteam 4.22.1 (GDExtension) `game/addons/godotsteam/` altında; DLL/SO dosyaları LFS'te.
+  Steam'e `Engine.get_singleton("Steam")` ile erişilir (eklenti yüklenemezse oyun yerel ağa düşsün diye `Steam` global'i kullanılmaz).
 - Godot projesi `game/` altında. Komutlar (repo kökünden):
+  - Önbelleksiz ilk import'tan önce eklentiyi kaydet, yoksa import çıkışta çöker (SIGABRT):
+    `mkdir -p game/.godot && echo "res://addons/godotsteam/godotsteam.gdextension" > game/.godot/extension_list.cfg`
   - İçe aktar (class cache için, testlerden önce şart): `godot --headless --path game --import`
   - Unit testler: `godot --headless --path game --script res://tests/run_unit_tests.gd`
   - E2E (1 host + 3 istemci, gerçek ENet): `GODOT=godot game/tests/e2e/run_e2e.sh`

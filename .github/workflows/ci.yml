@@ -13,6 +13,8 @@ jobs:
       GODOT: ${{ github.workspace }}/.godot-bin/godot
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true  # GodotSteam's native libraries are stored in LFS
 
       - name: Cache Godot
         id: cache-godot
@@ -28,6 +30,13 @@ jobs:
           curl -sSL -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip"
           unzip -q godot.zip -d .godot-bin
           mv ".godot-bin/Godot_v${GODOT_VERSION}_linux.x86_64" "$GODOT"
+
+      # A fresh import that discovers a GDExtension mid-scan aborts on exit (Godot 4.7.2 +
+      # GodotSteam 4.22.1). Registering it up front makes Godot load it at start-up instead.
+      - name: Register GDExtensions
+        run: |
+          mkdir -p game/.godot
+          echo "res://addons/godotsteam/godotsteam.gdextension" > game/.godot/extension_list.cfg
 
       - name: Import project
         run: timeout 300 "$GODOT" --headless --path game --import

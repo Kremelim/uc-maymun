@@ -7,11 +7,11 @@
 
 | # | Kriter | Durum |
 |---|---|---|
-| 1 | Steam lobisi, arkadaş daveti, 4 istemci | Yerel ağda (ENet) çalışıyor. **Steam: Bölüm B** |
+| 1 | Steam lobisi, arkadaş daveti, 4 istemci | Yerel ağda çalışıyor. Steam kodu hazır, **Windows'ta test bekliyor (B1, B2)** |
 | 2 | Steam Voice ile 4 kişi konumsal ses | **Bölüm B** |
 | 3 | Host otoriter senkron, herkese sadece kendi geliri | ✅ Çalışıyor ve otomatik testle kanıtlandı |
 | 4 | 3D masa + 4 yer tutucu maymun, sese göre ağız | Masa ve maymunlar var. Ağız animasyonu: **Bölüm B** |
-| 5 | Windows export + Steam overlay | **Bölüm B** |
+| 5 | Windows export + Steam overlay | **B2'de test edilecek** |
 
 ## Bölüm A — yerel ağ (tamam)
 
@@ -78,19 +78,63 @@ Test, bilerek bozulmuş iki sürümde sızıntıyı yakalıyor: gelirlerin herke
 `tests/visual/render_table.gd`, masayı sahte verilerle bir koltuktan çizip PNG olarak kaydeder.
 Arayüz değişikliklerini 4 pencere açmadan kontrol etmek için. Kullanımı dosyanın başında.
 
-## Bölüm B — Steam (sıradaki)
+## Bölüm B — Steam
 
-Bunu Kerem'in Windows bilgisayarında, en az 2 Steam hesabıyla birlikte yapacağız.
+- [x] GodotSteam GDExtension **4.22.1** `game/addons/godotsteam/` altında (sadece Windows ve Linux dosyaları, LFS ile)
+- [x] Test App ID 480 ile Steam'i başlatma; Steam yoksa yerel ağ moduna düşme
+- [x] Steam lobisi kurma, lobi koduyla katılma, Steam davetini kabul etme (`SteamMultiplayerPeer`)
+- [ ] **B1:** tek başına Windows'ta test (aşağıda)
+- [ ] **B2:** bir arkadaşla, iki ayrı bilgisayardan test (aşağıda)
+- [ ] **B3:** SteamVoice ile 4 kişi konumsal ses + ağız animasyonu (sıradaki PR)
 
-- [ ] GodotSteam'in Godot 4.7.2 ile uyumlu GDExtension sürümünü `game/addons/` altına kurmak
-- [ ] Test AppID 480 ile Steam'i başlatmak (geliştirme sırasında kendi App ID'mize gerek yok)
-- [ ] `PeerFactory`'ye `SteamMultiplayerPeer` eklemek; Steam lobisi kurmak, arkadaş davet etmek
-- [ ] SteamVoice ile 4 kişi konumsal ses
-- [ ] Ses şiddetine göre maymunun ağzının açılıp kapanması
-- [ ] Windows export'u ve Steam overlay
+### Nasıl çalışıyor
 
-Farklı evlerden internet üzerinden bağlanmayı ENet ile denemeye gerek yok. Port yönlendirme gerektirir,
-Steam bunu bizim yerimize hallediyor.
+- **Steam masası kur:** arkadaşlara açık (friends-only) bir Steam lobisi kurar, sonra host olarak dinlemeye başlar. Ekranda **lobi kodu** çıkar.
+- **Kodla katıl:** lobi koduyla Steam lobisine girer ve lobinin sahibine bağlanır.
+- **Arkadaş davet et:** Steam overlay'inin davet penceresini açar. Davet oyun açıkken kabul edilirse oyun kendiliğinden katılır.
+- Steam açık değilse ya da eklenti yüklenemediyse oyun çökmez; lobide sebebi yazar ve sadece yerel ağ bölümü görünür.
+- Bağlantıdan sonraki her şey (koltuklar, gizli gelir, beyan) yerel ağ moduyla birebir aynı kodla çalışır.
+
+### Projeyi güncelledikten sonra
+
+1. `git pull` yap. Eklentinin DLL dosyaları **Git LFS** ile geliyor. `git lfs install` bir kez yapılmış olmalı (README).
+   Yapılmadıysa DLL'ler küçük işaretçi dosyaları olarak iner ve lobi "GodotSteam eklentisi yüklenemedi" der.
+2. Godot projeyi açarken yeni eklentiyi fark edip editörü **yeniden başlatmanı** isteyebilir; kabul et.
+   İstemezse ve hata görürsen **Project → Reload Current Project**.
+
+### B1 — tek başına (5 dakika)
+
+1. Steam'i aç ve giriş yap.
+2. Godot'da projeyi **tek pencereyle** çalıştır: Debug → Customize Run Instances'ta Multiple Instances'ı kapat, F5.
+3. Lobide **"Steam: <Steam adın> olarak bağlısın."** yazmalı ve ad kutusunda Steam adın olmalı.
+4. **Steam masası kur**'a bas. Birkaç saniye içinde lobi kodu çıkmalı ve oyuncu listesinde sen olmalısın.
+5. **Arkadaş davet et**'e bas. Steam overlay'i açılıyor mu, not et.
+   Oyun editörden başlatıldığında overlay çoğu zaman çıkmaz; bu B2'deki dışa aktarılmış oyunda tekrar denenecek.
+6. Steam arkadaş listende "Spacewar oynuyor" görünmen normal: geliştirmede Valve'ın test uygulamasını (480) kullanıyoruz.
+
+Bana gönder: 3. ve 4. adımın ekran görüntüsü. Bir şey ters giderse Godot'un alttaki **Output** panelindeki satırlar.
+
+### B2 — bir arkadaşla (iki ayrı bilgisayar, iki Steam hesabı)
+
+Aynı bilgisayarda iki Steam hesabı birlikte çalışmaz. Arkadaşın Steam'de **arkadaş listende** olmalı, çünkü lobi sadece arkadaşlara açık.
+
+1. **Windows çıktısı al** (arkadaşına Godot kurdurmamak için):
+   - Project → **Export…** → **Add…** → **Windows Desktop**.
+   - Export template eksik derse: **Manage Export Templates → Download and Install**.
+     Godot 4.7 sadece gereken platformu indirir.
+   - **Export Project…** → repo dışında bir klasör seç (ör. `C:\Users\kerem\game-project\builds\`).
+     "Export With Debug" işaretli kalsın, hata olursa log için.
+   - Klasörde `.exe`, `.pck` ve GodotSteam DLL'leri olmalı. Klasörü zip'le, arkadaşına gönder.
+2. İkiniz de Steam'i açın. Sen dışa aktardığın `.exe`'yi ya da editörü çalıştır, arkadaşın kendi `.exe`'sini.
+3. Sen: **Steam masası kur** → **Kodu kopyala** → kodu Discord'dan arkadaşına at.
+4. Arkadaşın: kodu yapıştırıp **Kodla katıl**. İki ekranda da iki oyuncu görünmeli.
+5. Sen: **Oyunu başlat**. Herkes sadece kendi gelirini görmeli; beyanlar herkes beyan edince açılmalı.
+6. Davet yolunu da dene: masadan kalkın, yeniden **Steam masası kur** → **Arkadaş davet et**.
+   Arkadaşın Steam'den daveti kabul edince (oyunu açıkken) masaya düşmeli.
+
+Bana gönder: hangi adımlar çalıştı, hangileri çalışmadı, her iki taraftan ekran görüntüsü.
+
+Farklı evlerden ENet ile bağlanmaya çalışmaya gerek yok; port yönlendirme gerektirir, Steam bunu bizim yerimize hallediyor.
 
 ## Bilinen sınırlar (bilerek ertelendi)
 
