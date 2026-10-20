@@ -114,6 +114,30 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Beyan et"
 
+[node name="VoiceRow" type="HBoxContainer" parent="Hud/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="MicToggle" type="CheckButton" parent="Hud/Panel/VBox/VoiceRow"]
+unique_name_in_owner = true
+layout_mode = 2
+button_pressed = true
+text = "Mikrofon"
+
+[node name="MicMeter" type="ProgressBar" parent="Hud/Panel/VBox/VoiceRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 1.0
+show_percentage = false
+
+[node name="LoopbackToggle" type="CheckButton" parent="Hud/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Kendi sesimi duy (mikrofon testi)"
+
 [node name="NewRoundButton" type="Button" parent="Hud/Panel/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -123,3 +147,5 @@ text = "Yeni tur dağıt (host)"
 unique_name_in_owner = true
 layout_mode = 2
 text = "Masadan kalk"
+
+[node name="SelfVoice" type="AudioStreamPlayer" parent="."]

@@ -22,7 +22,8 @@
 - Faz 1: konsept + kağıt prototip (`docs/gdd/kurallar-v0.1.md`).
 - Motor: ADR-0001 önerildi (Godot 4.7, teknik spike'a bağlı).
 - M1 spike: Bölüm A (yerel ağ, gizli gelir, beyan) çalışıyor; Kerem 4 pencereyle Windows'ta doğruladı.
-  Bölüm B: Steam lobi kodu yazıldı, Windows'ta test bekliyor (B1 tek başına, B2 arkadaşla). Sonra B3: ses. Bkz. `docs/spike-m1.md`.
+  Bölüm B: Steam lobisi iki ayrı evden 2 kişiyle doğrulandı (B1, B2). Steam daveti/overlay kendi App ID'mize kadar ertelendi.
+  B3 (ses, `net/voice_chat.gd`): kod hazır, Windows'ta test bekliyor. Bkz. `docs/spike-m1.md`.
 - Takvim: sabit tarih yok; kilometre taşlarıyla ilerleniyor (`docs/yol-haritasi.md`).
 
 ## Geliştirme ortamı
@@ -39,7 +40,8 @@
   - Uyarı kontrolü (editörün gösterdiği GDScript uyarıları ekransız çalışmada görünmez; bu onları hata yapar):
     `godot --headless --path game --script res://tests/lint_warnings.gd`
   - Unit testler: `godot --headless --path game --script res://tests/run_unit_tests.gd`
-  - E2E (1 host + 3 istemci, gerçek ENet): `GODOT=godot game/tests/e2e/run_e2e.sh`
+    (autoload'lar yüklendikten sonra çalışır; test sırasında motor hatası olursa test başarısız sayılır)
+  - E2E (1 host + 3 istemci, gerçek ENet, `--fake-voice` ile ses aktarımı dahil): `GODOT=godot game/tests/e2e/run_e2e.sh`
   - Görsel kontrol (masayı Xvfb altında çizip PNG kaydeder): kullanımı `game/tests/visual/render_table.gd` başında. Arayüz değiştiğinde çalıştırıp görüntüye bak.
 - CI (`.github/workflows/ci.yml`) her PR'da import, uyarı kontrolü, unit ve E2E çalıştırır.
 - Sahne düğümü uyarıları (ör. autowrap'li Label'a minimum genişlik) bu kontrole girmez; .tscn yazarken dikkat.

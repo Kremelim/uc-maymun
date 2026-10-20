@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # End-to-end test: 1 host + (PLAYERS-1) clients run headless on localhost over ENet.
-# Passes when every income reached only its owner (see e2e_probe.gd).
+# Passes when every income reached only its owner and everyone heard everyone
+# else's (fake) voice through the host, never their own (see e2e_probe.gd).
 # Usage: GODOT=/path/to/godot game/tests/e2e/run_e2e.sh
 set -uo pipefail
 
@@ -15,7 +16,7 @@ NAMES=()
 run() {
 	local name="$1"
 	shift
-	timeout 60 "$GODOT" --headless --path "$PROJECT_DIR" -- --e2e --port="$PORT" "$@" >"$LOG_DIR/$name.log" 2>&1 &
+	timeout 60 "$GODOT" --headless --path "$PROJECT_DIR" -- --e2e --fake-voice --port="$PORT" "$@" >"$LOG_DIR/$name.log" 2>&1 &
 	PIDS+=("$!")
 	NAMES+=("$name")
 }

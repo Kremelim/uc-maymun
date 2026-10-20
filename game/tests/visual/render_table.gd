@@ -4,6 +4,8 @@ extends SceneTree
 ##   SEAT=0 STATE=pending|revealed OUT=/path/shot.png xvfb-run -a godot --path game \
 ##     --rendering-method gl_compatibility --rendering-driver opengl3 \
 ##     --resolution 960x540 --script res://tests/visual/render_table.gd
+## Add MOUTH_OPEN=1 to show the monkeys talking, and "-- --fake-voice" at the end
+## to show the HUD's voice controls.
 
 const NAMES := ["Kerem", "Gonc", "Abdulalim", "Ulas"]
 const FRAMES_TO_SETTLE := 30
@@ -36,6 +38,9 @@ func _run() -> void:
 		}
 	change_scene_to_file("res://features/table/table.tscn")
 	for i in FRAMES_TO_SETTLE:
+		if OS.get_environment("MOUTH_OPEN") == "1":
+			for monkey in root.find_children("*", "MonkeyPlaceholder", true, false):
+				(monkey as MonkeyPlaceholder).set_mouth_open(1.0)
 		await process_frame
 	root.get_texture().get_image().save_png(OS.get_environment("OUT"))
 	quit()

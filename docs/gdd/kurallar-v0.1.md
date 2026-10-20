@@ -133,4 +133,6 @@ Kurallar netleşince bu hesapları simülasyonla doğrulayacağız: bot strateji
 - Kalan borç son tura kapatılamayacak kadar büyürse geri kalan oyun anlamsızlaşır → erken iflas kuralı?
 - Eşitlik (tie) kuralının yeterliliği.
 - 3 veya 5 oyuncu: gelir toplamı, taksit ve denetçi sırası nasıl ölçeklenecek?
+- **2 oyuncu olmaz:** toplam bilindiği için gelirin biri belli olunca diğeri de belli olur (toplam − kendi gelirin).
+  İlk Steam testinde (2 kişi) görüldü. Oyunun alt sınırı en az 3 oyuncu.
 - **Dijitale özgü:** oyuncu kopması, AFK, host'un çıkması, mikrofonu olmayan oyuncu.
