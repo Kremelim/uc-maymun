@@ -124,14 +124,18 @@ Aynı bilgisayarda iki Steam hesabı birlikte çalışmaz. Arkadaşın Steam'de 
    - **Dışa aktarma şablonlarını bir kez kur:**
      - **Düzenleyici → Dışa Aktarma Şablonlarını Yönet…** (Editor → Manage Export Templates…) → **İndir ve Yükle** (Download and Install).
      - "Beklenen yolda herhangi bir dışa aktarma şablonu bulunamadı" uyarısı bu yüzden çıkıyordu.
-   - **Proje → Dışa Aktar…** (Project → Export…) → **Windows Desktop** ön ayarı.
-     - **Export Path**'e klasör değil dosya yaz: `../../builds/UcMaymun.exe`.
-     - Yol `game/` klasörüne göre; bu `C:\Users\kerem\game-project\builds\` demek, yani repo dışında.
-   - **Projeyi Dışa Aktar…** (Export Project…). "Hata ayıklama ile dışa aktar" (Export With Debug) işaretli kalsın, hata olursa log için.
+   - **Proje → Dışa Aktar…** (Project → Export…) → **Windows Desktop** ön ayarı → **Projeyi Dışa Aktar…** (Export Project…).
+   - Açılan **Bir Dosya Kaydet** penceresi exe'nin nereye yazılacağını sorar. Exe ve `builds` klasörü bu adımda oluşur:
+     1. **↑** (yukarı) okuyla iki kez çık: yol `/Users/kerem/game-project` olmalı. Böylece repo dışındasın; build dosyaları Git'e girmez.
+     2. Sağ üstteki **+ işaretli klasör** simgesiyle `builds` klasörünü oluştur ve içine gir.
+     3. **Dosya:** kutusuna `UcMaymun.exe` yaz → **Kaydet**.
+        "Hata Ayıklama ile Dışa Aktar" (Export With Debug) kutusu varsa işaretli kalsın, hata olursa log için.
+   - Godot bu yolu hatırlar (`../../builds/UcMaymun.exe`, `game/` klasörüne göre). Sonraki seferlerde sadece **Projeyi Dışa Aktar…** yeter.
    - `builds` klasöründe şunlar olmalı:
      - `UcMaymun.exe`, `UcMaymun.console.exe` (logları siyah pencerede gösterir), `UcMaymun.pck`
      - `libgodotsteam.windows.template_debug.x86_64.dll`, `steam_api64.dll`
-     Klasörü zip'le, arkadaşına gönder.
+   - Kontrol: Steam açıkken `UcMaymun.exe`'ye çift tıkla. Lobide "Steam: <adın> olarak bağlısın" yazmalı.
+     Sonra klasörü zip'le, arkadaşına gönder.
    - Ön ayar `game/export_presets.cfg` dosyasına kaydedilir. GitHub Desktop'ta yeni dosya olarak görünür.
      Bunu commit et: herkes aynı ayarla dışa aktarsın. Şifre veya anahtar içermez; Godot onları `.godot/` altında tutar.
 2. İkiniz de Steam'i açın. Sen dışa aktardığın `.exe`'yi ya da editörü çalıştır, arkadaşın kendi `.exe`'sini.
