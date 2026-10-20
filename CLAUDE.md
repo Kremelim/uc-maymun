@@ -10,15 +10,24 @@
 
 ## Ekip
 
-- **Kerem Ataç:** geliştirme (Claude ile birlikte), teknik kararlar
+- **Kerem Ataç:** geliştirme (Claude ile birlikte), teknik kararlar.
+  - Daha önce Unity ile 2D bir mobil oyun yaptı; editör, asset ve sahne kurulumunu biliyor. Kodlamada kendini başlangıç seviyesinde görüyor ama hızlı öğreniyor.
+  - Bu yüzden kararların ve kodun "neden"ini kısaca açıkla, editörde yapılacak adımları tek tek yaz.
 - **Kerem Gönç:** oyun fikrinin sahibi, tasarım. Kural değişikliklerinde onayı alınır.
-- **Abdulalim Çiftçi:** rol belirlenecek
-- **Ulaş Uzun:** rol belirlenecek
+- **Abdulalim Çiftçi:** fikir ve destek; somut sorumluluk alanı belirlenecek.
+- **Ulaş Uzun:** fikir ve destek; somut sorumluluk alanı belirlenecek.
 
 ## Durum (2026-10-20)
 
 - Faz 1: konsept + kağıt prototip (`docs/gdd/kurallar-v0.1.md`).
 - Motor: ADR-0001 önerildi (Godot 4.7, teknik spike'a bağlı). Henüz oyun kodu yok.
+- Takvim: sabit tarih yok; kilometre taşlarıyla ilerleniyor (`docs/yol-haritasi.md`).
+
+## Geliştirme ortamı
+
+- Ekip Windows kullanıyor. Godot sürümü: **4.7.2-stable** (herkes aynı sürümü kullanır).
+- Claude'un bulut oturumunda Godot 4.7.2 ekransız (`--headless`) çalışıyor. Testler ve simülasyonlar orada koşturulur.
+- Steam'e bağlı her şey (lobi, ses, overlay) sadece ekibin Windows makinelerinde test edilebilir.
 
 ## Çalışma kuralları
 
