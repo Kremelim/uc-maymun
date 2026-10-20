@@ -1,4 +1,6 @@
-* text=auto
+* text=auto eol=lf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
 
 # Git LFS — büyük ikili dosyalar
 *.png filter=lfs diff=lfs merge=lfs -text

@@ -36,10 +36,13 @@
   - Önbelleksiz ilk import'tan önce eklentiyi kaydet, yoksa import çıkışta çöker (SIGABRT):
     `mkdir -p game/.godot && echo "res://addons/godotsteam/godotsteam.gdextension" > game/.godot/extension_list.cfg`
   - İçe aktar (class cache için, testlerden önce şart): `godot --headless --path game --import`
+  - Uyarı kontrolü (editörün gösterdiği GDScript uyarıları ekransız çalışmada görünmez; bu onları hata yapar):
+    `godot --headless --path game --script res://tests/lint_warnings.gd`
   - Unit testler: `godot --headless --path game --script res://tests/run_unit_tests.gd`
   - E2E (1 host + 3 istemci, gerçek ENet): `GODOT=godot game/tests/e2e/run_e2e.sh`
   - Görsel kontrol (masayı Xvfb altında çizip PNG kaydeder): kullanımı `game/tests/visual/render_table.gd` başında. Arayüz değiştiğinde çalıştırıp görüntüye bak.
-- CI (`.github/workflows/ci.yml`) her PR'da bu üçünü çalıştırır.
+- CI (`.github/workflows/ci.yml`) her PR'da import, uyarı kontrolü, unit ve E2E çalıştırır.
+- Sahne düğümü uyarıları (ör. autowrap'li Label'a minimum genişlik) bu kontrole girmez; .tscn yazarken dikkat.
 
 ## Çalışma kuralları
 

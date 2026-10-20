@@ -37,6 +37,7 @@ placeholder_text = "Adın"
 
 [node name="SteamStatusLabel" type="Label" parent="Center/VBox"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 0)
 layout_mode = 2
 text = "Steam kontrol ediliyor…"
 autowrap_mode = 3
@@ -120,5 +121,6 @@ text = "Oyunu başlat"
 
 [node name="StatusLabel" type="Label" parent="Center/VBox"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 0)
 layout_mode = 2
 autowrap_mode = 3
