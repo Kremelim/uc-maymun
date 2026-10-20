@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="RulesConfig" format=3]
+
+[ext_resource type="Script" path="res://core/rules_config.gd" id="1_r71tq"]
+
+[resource]
+script = ExtResource("1_r71tq")
+income_sets = Array[PackedInt32Array]([PackedInt32Array(2, 4, 6, 8), PackedInt32Array(1, 3, 7, 9), PackedInt32Array(5, 5, 5, 5), PackedInt32Array(2, 2, 6, 10), PackedInt32Array(3, 4, 6, 7), PackedInt32Array(1, 1, 8, 10), PackedInt32Array(4, 4, 4, 8), PackedInt32Array(2, 3, 5, 10)])

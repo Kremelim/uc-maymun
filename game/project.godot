@@ -1,0 +1,24 @@
+; Engine configuration file.
+; Edit through Project > Project Settings in the editor where possible.
+
+config_version=5
+
+[application]
+
+config/name="Üç Maymun"
+run/main_scene="res://features/lobby/lobby.tscn"
+config/features=PackedStringArray("4.7", "Forward Plus")
+
+[autoload]
+
+Network="*res://net/network.gd"
+Session="*res://net/session.gd"
+
+[debug]
+
+gdscript/warnings/untyped_declaration=1
+
+[display]
+
+window/size/viewport_width=960
+window/size/viewport_height=540

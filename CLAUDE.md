@@ -20,7 +20,8 @@
 ## Durum (2026-10-20)
 
 - Faz 1: konsept + kağıt prototip (`docs/gdd/kurallar-v0.1.md`).
-- Motor: ADR-0001 önerildi (Godot 4.7, teknik spike'a bağlı). Henüz oyun kodu yok.
+- Motor: ADR-0001 önerildi (Godot 4.7, teknik spike'a bağlı).
+- M1 spike: Bölüm A (yerel ağ, gizli gelir, beyan) çalışıyor ve testli. Sırada Bölüm B (Steam). Bkz. `docs/spike-m1.md`.
 - Takvim: sabit tarih yok; kilometre taşlarıyla ilerleniyor (`docs/yol-haritasi.md`).
 
 ## Geliştirme ortamı
@@ -28,6 +29,11 @@
 - Ekip Windows kullanıyor. Godot sürümü: **4.7.2-stable** (herkes aynı sürümü kullanır).
 - Claude'un bulut oturumunda Godot 4.7.2 ekransız (`--headless`) çalışıyor. Testler ve simülasyonlar orada koşturulur.
 - Steam'e bağlı her şey (lobi, ses, overlay) sadece ekibin Windows makinelerinde test edilebilir.
+- Godot projesi `game/` altında. Komutlar (repo kökünden):
+  - İçe aktar (class cache için, testlerden önce şart): `godot --headless --path game --import`
+  - Unit testler: `godot --headless --path game --script res://tests/run_unit_tests.gd`
+  - E2E (1 host + 3 istemci, gerçek ENet): `GODOT=godot game/tests/e2e/run_e2e.sh`
+- CI (`.github/workflows/ci.yml`) her PR'da bu üçünü çalıştırır.
 
 ## Çalışma kuralları
 

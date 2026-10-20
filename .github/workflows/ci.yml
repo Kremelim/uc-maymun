@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GODOT_VERSION: 4.7.2-stable
+      GODOT: ${{ github.workspace }}/.godot-bin/godot
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: .godot-bin
+          key: godot-${{ env.GODOT_VERSION }}
+
+      - name: Download Godot
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p .godot-bin
+          curl -sSL -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          unzip -q godot.zip -d .godot-bin
+          mv ".godot-bin/Godot_v${GODOT_VERSION}_linux.x86_64" "$GODOT"
+
+      - name: Import project
+        run: timeout 300 "$GODOT" --headless --path game --import
+
+      - name: Unit tests
+        run: timeout 120 "$GODOT" --headless --path game --script res://tests/run_unit_tests.gd
+
+      - name: End-to-end hidden information test
+        run: game/tests/e2e/run_e2e.sh
