@@ -86,7 +86,7 @@ func join_steam_lobby(lobby_id: int, player_name: String) -> void:
 
 ## Host only. Seats are packed to 0..n-1 first so the rules engine sees contiguous seats.
 func start_game() -> void:
-	if not _is_host or game_in_progress or roster.size() < Session.RULES.min_players:
+	if not _is_host or game_in_progress or roster.size() < Session.RULES.spike_min_players:
 		return
 	game_in_progress = true
 	SteamService.set_lobby_joinable(false)
