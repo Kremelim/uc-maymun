@@ -7,11 +7,11 @@
 
 | # | Kriter | Durum |
 |---|---|---|
-| 1 | Steam lobisi, arkadaş daveti, 4 istemci | Yerel ağda çalışıyor. Steam kodu hazır, **Windows'ta test bekliyor (B1, B2)** |
-| 2 | Steam Voice ile 4 kişi konumsal ses | **Bölüm B** |
+| 1 | Steam lobisi, arkadaş daveti, 4 istemci | ✅ Steam üzerinden 2 kişi, iki ayrı evden (lobi koduyla). 4 kişi Steam'de henüz denenmedi. Steam daveti kendi App ID'mize kadar ertelendi |
+| 2 | Steam Voice ile 4 kişi konumsal ses | Kod hazır, sahte mikrofonla otomatik test ediliyor. **Windows'ta test bekliyor (B3)** |
 | 3 | Host otoriter senkron, herkese sadece kendi geliri | ✅ Çalışıyor ve otomatik testle kanıtlandı |
-| 4 | 3D masa + 4 yer tutucu maymun, sese göre ağız | Masa ve maymunlar var. Ağız animasyonu: **Bölüm B** |
-| 5 | Windows export + Steam overlay | **B2'de test edilecek** |
+| 4 | 3D masa + 4 yer tutucu maymun, sese göre ağız | Ağız sesin şiddetine göre açılıyor, konuşanın adı sarıya dönüyor. **B3'te test edilecek** |
+| 5 | Windows export + Steam overlay | ✅ Windows export. Overlay kendi App ID'mize kadar ertelendi (aşağıda) |
 
 ## Bölüm A — yerel ağ (tamam)
 
@@ -68,7 +68,9 @@ ne aldığını raporlar. Host kontrol eder:
 - her istemci sadece kendi gelirini mi aldı;
 - herkese açık durumda gelir sızıntısı var mı;
 - beyanlar masaya ulaştı mı;
-- kayıp jeton doğru mu.
+- kayıp jeton doğru mu;
+- herkes diğer herkesin sesini duydu mu, kimse kendi sesini geri almadı mı.
+  Testte mikrofon yerine `--fake-voice` ile bir test tonu kullanılıyor.
 
 Ayrıca açılıştan önce kimsenin başkasının beyan miktarını görmediğini de kontrol eder.
 Test, bilerek bozulmuş iki sürümde sızıntıyı yakalıyor: gelirlerin herkese gönderildiği bir sürüm ve beyanların erken açıldığı bir sürüm.
@@ -84,8 +86,9 @@ Arayüz değişikliklerini 4 pencere açmadan kontrol etmek için. Kullanımı d
 - [x] Test App ID 480 ile Steam'i başlatma; Steam yoksa yerel ağ moduna düşme
 - [x] Steam lobisi kurma, lobi koduyla katılma, Steam davetini kabul etme (`SteamMultiplayerPeer`)
 - [x] **B1:** tek başına Windows'ta test. Steam başlıyor, lobi kuruluyor, kod çıkıyor. Overlay editörden açılmadı (beklenen, aşağıda).
-- [ ] **B2:** bir arkadaşla, iki ayrı bilgisayardan test (aşağıda)
-- [ ] **B3:** SteamVoice ile 4 kişi konumsal ses + ağız animasyonu (sıradaki PR)
+- [x] **B2:** bir arkadaşla, iki ayrı evden test. Lobi koduyla katılma, gizli gelir, beyan çalışıyor.
+  Oyuncu ya da host oyun sırasında ayrılınca diğer taraf lobiye dönüyor. Steam daveti ve overlay açılmadı (beklenen, aşağıda).
+- [ ] **B3:** Steam sesiyle konumsal sesli sohbet + ağız animasyonu. Kod hazır, test adımları aşağıda.
 
 ### Nasıl çalışıyor
 
@@ -152,8 +155,41 @@ Bana gönder: hangi adımlar çalıştı, hangileri çalışmadı, her iki taraf
 
 Farklı evlerden ENet ile bağlanmaya çalışmaya gerek yok; port yönlendirme gerektirir, Steam bunu bizim yerimize hallediyor.
 
+### B3 — sesli sohbet
+
+Nasıl çalışıyor:
+- Masadayken mikrofonun Steam üzerinden kaydedilir ve Steam'in ses kodlayıcısıyla sıkıştırılır.
+- Ses host'a gider, host diğerlerine iletir. Ses ayrı bir ağ kanalında gittiği için oyun mesajlarını beklemez.
+- Her maymunun sesi kendi kafasından gelir: soldaki soldan, karşıdaki karşıdan duyulur.
+- Konuşan maymunun ağzı sesin şiddetine göre açılır ve adı sarıya döner.
+- Paneldeki **Mikrofon** düğmesi mikrofonu açıp kapatır, yanındaki çubuk ne kadar yüksek sesle konuştuğunu gösterir.
+
+Önce mikrofonu kontrol et: **Steam → Ayarlar → Sesli** (Voice) bölümünden doğru mikrofonu seç ve oradaki test ile çalıştığını gör.
+Oyun mikrofonu Steam üzerinden kullanıyor. Windows mikrofon izni de açık olmalı: Ayarlar → Gizlilik → Mikrofon.
+
+**Tek başına (2 dakika):**
+1. Oyunu dışa aktar (yeni sürüm), Steam açıkken çalıştır, **Steam masası kur** → **Oyunu başlat**.
+2. Konuş: paneldeki çubuk hareket etmeli.
+3. **Kendi sesimi duy (mikrofon testi)**'ni aç: kendi sesini hafif gecikmeli duymalısın.
+   Hoparlör yerine kulaklık kullan, yoksa ses döngüye girip ötebilir. Testten sonra kapat.
+
+**Arkadaşınla:**
+1. Yeni sürümü dışa aktarıp arkadaşına tekrar gönder. İkiniz aynı sürümü kullanmalısınız.
+2. Lobi koduyla aynı masaya geçin ve oyunu başlatın.
+3. Konuşun:
+   - Birbirinizi duyuyor musunuz, gecikme ne kadar?
+   - Ses doğru yönden geliyor mu? Arkadaşın sağındaysa sesi sağdan gelmeli.
+   - Konuşanın ağzı açılıp adı sararıyor mu?
+4. **Mikrofon**'u kapatınca karşı taraf seni duymamalı.
+
+Bana gönder: duyup duymadığınız, gecikme ve ses kalitesi hakkında izleniminiz, ses yönü doğru mu, bir ekran görüntüsü.
+Çıktıyı `UcMaymun.console.exe` ile açarsan siyah pencerede hata satırları görünür; bir şey ters giderse onları da gönder.
+
 ## Bilinen sınırlar (bilerek ertelendi)
 
+- **2 kişide gizli bilgi kalmıyor.** Masaya dağıtılan toplam bilindiği için 2 kişide herkes diğerinin gelirini hesaplayabiliyor.
+  Spike'ta test kolaylığı için 2 kişiyle başlanabiliyor; oyunun gerçek alt sınırı 3 olmalı (`docs/gdd/kurallar-v0.1.md`).
+- Ses sadece Steam'le çalışıyor; yerel ağ modunda ses yok. Bas-konuş (push-to-talk), fısıltı ve oyuncu başına sessize alma M2'de.
 - Bir oyuncu oyun sırasında ayrılırsa maç biter ve herkes lobiye döner. Bot devralması ya da duraklatma M2'de.
 - Arayüz metinleri kodda Türkçe yazılı. Çeviri sistemi (TR/EN) M2'de.
 - Host her şeyi bilir; arkadaşlar arasında kabul edilebilir. Açık lobiler için yeniden değerlendirilecek.
