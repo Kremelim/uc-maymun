@@ -28,8 +28,8 @@ height = 0.2
 
 [sub_resource type="SphereMesh" id="Mesh_mouth"]
 material = SubResource("Mat_mouth")
-radius = 0.08
-height = 0.08
+radius = 0.1
+height = 0.14
 
 [node name="MonkeyPlaceholder" type="Node3D"]
 script = ExtResource("1_monkey")
@@ -47,7 +47,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -0.2)
 mesh = SubResource("Mesh_muzzle")
 
 [node name="Mouth" type="MeshInstance3D" parent="Head/Muzzle"]
-transform = Transform3D(1, 0, 0, 0, 0.15, 0, 0, 0, 1, 0, -0.05, -0.1)
+transform = Transform3D(1, 0, 0, 0, 0.1, 0, 0, 0, 1, 0, -0.06, -0.1)
 mesh = SubResource("Mesh_mouth")
 
 [node name="VoicePlayer" type="AudioStreamPlayer3D" parent="Head"]
