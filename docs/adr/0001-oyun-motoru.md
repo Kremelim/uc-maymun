@@ -34,6 +34,14 @@ Spike başarısız olursa **Unity**'ye geçilir: bu türde kanıtlanmış ve Ste
 
 **Kararı değiştirebilecek bilgi:** Ekipte güçlü C#/Unity deneyimi varsa Unity baştan tercih edilebilir.
 
+### Güncelleme — 2026-10-20
+
+- **Ekip deneyimi:** Kerem Ataç daha önce Unity ile 2D bir mobil oyun yaptı. Editör ve sahne kurulumunu biliyor, kodlamada başlangıç seviyesinde. Bu Unity'yi baştan seçmeyi gerektirecek bir avantaj değil. Sahne, node ve inspector mantığı Godot'a doğrudan taşınıyor.
+- **Doğrulandı:** Godot 4.7.2 Claude'un bulut ortamında ekransız çalışıyor; GDScript, seed'li RNG ve ENet sunucusu test edildi. Yani Claude kendi yazdığı kodu test edip doğrulayabiliyor.
+  - Unity editörü bu ortamda çalışmıyor. Unity seçilseydi Claude kodu derlemeden ve test etmeden yazacak, bütün editör işini Kerem yapacaktı.
+  - Ana geliştiricinin başlangıç seviyesinde olduğu bir ekipte bu fark belirleyici.
+- **Sonuç:** Godot önerisi güçlendi. Steam lobi ve ses kriterleri için spike yine gerekli.
+
 ## Sonuçlar
 
 - **Kural motoru:** Ağdan ve görüntüden bağımsız saf kod. Deterministik, seed'li, ekransız test edilebilir, botlarla simüle edilebilir. Motor değişirse taşıma bir yeniden yazım değil, bir çeviri olur.
