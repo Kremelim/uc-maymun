@@ -8,24 +8,6 @@ extends SceneTree
 const UNIT_DIR := "res://tests/unit"
 
 
-## Collects engine errors so a test that errors out cannot pass silently.
-class ErrorCollector extends Logger:
-	var errors := PackedStringArray()
-	var _mutex := Mutex.new()
-
-	func _log_error(function: String, file: String, line: int, code: String, rationale: String, _editor_notify: bool, _error_type: int, _script_backtraces: Array) -> void:
-		_mutex.lock()
-		errors.append("%s (%s:%d in %s)" % [rationale if rationale != "" else code, file, line, function])
-		_mutex.unlock()
-
-	func take() -> PackedStringArray:
-		_mutex.lock()
-		var taken := errors
-		errors = PackedStringArray()
-		_mutex.unlock()
-		return taken
-
-
 func _init() -> void:
 	# Deferred so autoloads (Network, SteamService, ...) exist when test scripts compile.
 	_run.call_deferred()

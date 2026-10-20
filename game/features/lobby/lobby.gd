@@ -97,7 +97,7 @@ func _refresh() -> void:
 	if hosting_steam:
 		_lobby_code_edit.text = str(SteamService.lobby_id)
 	_start_button.visible = Network.is_host()
-	_start_button.disabled = Network.roster.size() < Session.RULES.min_players
+	_start_button.disabled = Network.roster.size() < Session.RULES.spike_min_players
 	if not at_table:
 		_players_label.text = "Henüz bir masada değilsin."
 		return

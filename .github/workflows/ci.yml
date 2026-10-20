@@ -47,5 +47,9 @@ jobs:
       - name: Unit tests
         run: timeout 120 "$GODOT" --headless --path game --script res://tests/run_unit_tests.gd
 
+      # A few matches per experiment: catches engine errors and crashes in the bots, not balance.
+      - name: Simulator smoke run
+        run: timeout 120 "$GODOT" --headless --path game --script res://sim/simulate.gd -- --matches=20 --out="$RUNNER_TEMP/sim.md"
+
       - name: End-to-end hidden information test
         run: game/tests/e2e/run_e2e.sh
