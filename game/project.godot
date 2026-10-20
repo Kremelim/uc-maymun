@@ -11,6 +11,7 @@ config/features=PackedStringArray("4.7", "Forward Plus")
 
 [autoload]
 
+SteamService="*res://net/steam_service.gd"
 Network="*res://net/network.gd"
 Session="*res://net/session.gd"
 
