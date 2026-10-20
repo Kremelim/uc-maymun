@@ -167,15 +167,29 @@ Nasıl çalışıyor:
 - Her maymunun sesi kendi kafasından gelir: soldaki soldan, karşıdaki karşıdan duyulur.
 - Konuşan maymunun ağzı sesin şiddetine göre açılır ve adı sarıya döner.
 - Paneldeki **Mikrofon** düğmesi mikrofonu açıp kapatır, yanındaki çubuk ne kadar yüksek sesle konuştuğunu gösterir.
+- **Gelen ses** satırı her oyuncudan gelen sesin şiddetini gösterir (`Gonc 0.12 · Ulas —`).
+  "—" son bir saniyede o oyuncudan hiç ses gelmediği anlamına gelir.
+  Ağız kıpırdamıyorsa önce buna bak: değer görünüyorsa ses geliyor, sorun ağızda; "—" ise ses hiç gelmiyor.
 
 Önce mikrofonu kontrol et: **Steam → Ayarlar → Sesli** (Voice) bölümünden doğru mikrofonu seç ve oradaki test ile çalıştığını gör.
 Oyun mikrofonu Steam üzerinden kullanıyor. Windows mikrofon izni de açık olmalı: Ayarlar → Gizlilik → Mikrofon.
 
-**Tek başına (2 dakika):**
+**Tek başına — mikrofon (2 dakika):**
 1. Oyunu dışa aktar (yeni sürüm), Steam açıkken çalıştır, **Steam masası kur** → **Oyunu başlat**.
 2. Konuş: paneldeki çubuk hareket etmeli.
 3. **Kendi sesimi duy (mikrofon testi)**'ni aç: kendi sesini hafif gecikmeli duymalısın.
    Hoparlör yerine kulaklık kullan, yoksa ses döngüye girip ötebilir. Testten sonra kapat.
+
+Kendi maymununu görmediğin için (birinci şahıs) kendi konuşmanda ağız göremezsin.
+4 pencereyle denemek de mikrofon için güvenilir değil: hepsi aynı Steam hesabı ve aynı mikrofon,
+Steam sesi büyük ihtimalle pencerelerden sadece birine veriyor.
+
+**Tek başına — ağız ve ses yönü (2 dakika):**
+1. 4 pencereli çalıştırmadaki (Debug → Customize Run Instances) her satırın sonuna ` --fake-voice` ekle.
+2. F5. Her pencere mikrofon yerine kesik kesik bir test tonu "konuşur".
+3. Her pencerede diğer üç maymunun ağzı açılıp kapanmalı, adları sararmalı. **Gelen ses** satırında üç değer görünmeli.
+4. Kulaklıkla dinle: tonlar soldan, karşıdan ve sağdan gelmeli.
+5. Bitince ` --fake-voice`'u satırlardan sil, yoksa gerçek mikrofon kullanılmaz.
 
 **Arkadaşınla:**
 1. Yeni sürümü dışa aktarıp arkadaşına tekrar gönder. İkiniz aynı sürümü kullanmalısınız.
@@ -193,7 +207,7 @@ Bana gönder: duyup duymadığınız, gecikme ve ses kalitesi hakkında izlenimi
 
 - **2 kişide gizli bilgi kalmıyor.** Masaya dağıtılan toplam bilindiği için 2 kişide herkes diğerinin gelirini hesaplayabiliyor.
   Spike'ta test kolaylığı için 2 kişiyle başlanabiliyor; oyunun gerçek alt sınırı 3 olmalı (`docs/gdd/kurallar-v0.1.md`).
-- Ses sadece Steam'le çalışıyor; yerel ağ modunda ses yok. Bas-konuş (push-to-talk), fısıltı ve oyuncu başına sessize alma M2'de.
+- Ses sadece Steam'le çalışıyor; yerel ağ modunda gerçek mikrofon yok (sadece `--fake-voice` test tonu). Bas-konuş (push-to-talk), fısıltı ve oyuncu başına sessize alma M2'de.
 - Bir oyuncu oyun sırasında ayrılırsa maç biter ve herkes lobiye döner. Bot devralması ya da duraklatma M2'de.
 - Arayüz metinleri kodda Türkçe yazılı. Çeviri sistemi (TR/EN) M2'de.
 - Host her şeyi bilir; arkadaşlar arasında kabul edilebilir. Açık lobiler için yeniden değerlendirilecek.

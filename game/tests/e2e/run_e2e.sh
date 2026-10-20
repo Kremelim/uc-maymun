@@ -36,6 +36,11 @@ for idx in "${!PIDS[@]}"; do
 done
 
 grep -h "E2E" "$LOG_DIR"/*.log || true
+# A passing run must also be a clean one: engine errors or leak warnings fail it too.
+if grep -H -E "^(ERROR|SCRIPT ERROR)|ObjectDB instances were leaked" "$LOG_DIR"/*.log; then
+	echo "engine errors or leaks in the logs above"
+	status=1
+fi
 if [ "$status" -ne 0 ]; then
 	for f in "$LOG_DIR"/*.log; do
 		echo "=== $f"

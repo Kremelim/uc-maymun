@@ -42,6 +42,7 @@
   - Unit testler: `godot --headless --path game --script res://tests/run_unit_tests.gd`
     (autoload'lar yüklendikten sonra çalışır; test sırasında motor hatası olursa test başarısız sayılır)
   - E2E (1 host + 3 istemci, gerçek ENet, `--fake-voice` ile ses aktarımı dahil): `GODOT=godot game/tests/e2e/run_e2e.sh`
+    (loglarda motor hatası ya da sızıntı uyarısı varsa, testler geçse bile başarısız sayılır)
   - Görsel kontrol (masayı Xvfb altında çizip PNG kaydeder): kullanımı `game/tests/visual/render_table.gd` başında. Arayüz değiştiğinde çalıştırıp görüntüye bak.
 - CI (`.github/workflows/ci.yml`) her PR'da import, uyarı kontrolü, unit ve E2E çalıştırır.
 - Sahne düğümü uyarıları (ör. autowrap'li Label'a minimum genişlik) bu kontrole girmez; .tscn yazarken dikkat.

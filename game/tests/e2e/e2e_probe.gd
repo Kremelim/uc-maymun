@@ -60,6 +60,8 @@ func _on_voice(peer_id: int, _frames: PackedVector2Array, _level: float) -> void
 
 # Voice keeps arriving after the reveal, so both sides re-check every frame.
 func _process(_delta: float) -> void:
+	if _finished:
+		return  # Leaving the table afterwards would otherwise look like a fresh, empty game.
 	if Network.is_host():
 		_check_reports()
 	else:

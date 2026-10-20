@@ -21,8 +21,13 @@ const FAKE_SAMPLE_RATE := 16000
 const FAKE_PACKETS_PER_SECOND := 50
 const FAKE_TONE_HZ := 220.0
 const FAKE_TONE_AMPLITUDE := 0.3
+## The fake voice swells and fades this many times a second, like syllables,
+## so the mouths visibly open and close in a test run.
+const FAKE_SYLLABLES_HZ := 1.5
 ## Upper bound on fake packets per frame, so a long hitch does not flood the network.
 const FAKE_MAX_PACKETS_PER_FRAME := 5
+## A speaker counts as silent when no packet came from them for this long.
+const INCOMING_STALE_MSEC := 1000
 
 var mic_enabled := true
 ## Plays your own voice back to you, to test the microphone alone.
@@ -36,6 +41,8 @@ var _recording := false
 var _sample_rate := 48000
 var _fake_clock := 0.0
 var _fake_phase := 0.0
+var _fake_time := 0.0
+var _incoming: Dictionary = {}  # speaker peer_id -> {"level": float, "msec": int}
 
 
 func _ready() -> void:
@@ -98,8 +105,10 @@ func _read_fake_packets(delta: float) -> Array[PackedByteArray]:
 	while _fake_clock >= interval:
 		_fake_clock -= interval
 		var samples := int(FAKE_SAMPLE_RATE * interval)
-		packets.append(make_tone_pcm16(samples, FAKE_SAMPLE_RATE, FAKE_TONE_HZ, FAKE_TONE_AMPLITUDE, _fake_phase))
+		var envelope := 0.5 + 0.5 * sin(TAU * FAKE_SYLLABLES_HZ * _fake_time)
+		packets.append(make_tone_pcm16(samples, FAKE_SAMPLE_RATE, FAKE_TONE_HZ, FAKE_TONE_AMPLITUDE * envelope, _fake_phase))
 		_fake_phase = fmod(_fake_phase + TAU * FAKE_TONE_HZ * samples / FAKE_SAMPLE_RATE, TAU)
+		_fake_time += interval
 	return packets
 
 
@@ -143,8 +152,22 @@ func _from_host(speaker: int, packet: PackedByteArray) -> void:
 
 func _play(speaker: int, packet: PackedByteArray) -> void:
 	var frames := _decode(packet)
-	if not frames.is_empty():
-		voice_received.emit(speaker, frames, level_of(frames))
+	if frames.is_empty():
+		return
+	var level := level_of(frames)
+	_incoming[speaker] = {"level": level, "msec": Time.get_ticks_msec()}
+	voice_received.emit(speaker, frames, level)
+
+
+## Loudness (0..1) of the latest voice packet from `peer_id`, or -1 if they are silent.
+## Lets testers see whether voice arrives at all, separately from the mouth animation.
+func incoming_level(peer_id: int) -> float:
+	if not _incoming.has(peer_id):
+		return -1.0
+	var entry: Dictionary = _incoming[peer_id]
+	if Time.get_ticks_msec() - int(entry["msec"]) > INCOMING_STALE_MSEC:
+		return -1.0
+	return entry["level"]
 
 
 func _decode(packet: PackedByteArray) -> PackedVector2Array:

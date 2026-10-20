@@ -26,6 +26,7 @@ var _self_voice_playback: AudioStreamGeneratorPlayback
 @onready var _mic_toggle: CheckButton = %MicToggle
 @onready var _loopback_toggle: CheckButton = %LoopbackToggle
 @onready var _mic_meter: ProgressBar = %MicMeter
+@onready var _incoming_voice_label: Label = %IncomingVoiceLabel
 @onready var _self_voice: AudioStreamPlayer = $SelfVoice
 
 
@@ -65,6 +66,7 @@ func _build_seats() -> void:
 func _setup_voice() -> void:
 	_voice_row.visible = VoiceChat.is_available()
 	_loopback_toggle.visible = VoiceChat.is_available()
+	_incoming_voice_label.visible = VoiceChat.is_available()
 	if not VoiceChat.is_available():
 		return
 	for seat: int in _monkeys:
@@ -85,6 +87,19 @@ func _setup_voice() -> void:
 func _process(_delta: float) -> void:
 	if _voice_row.visible:
 		_mic_meter.value = clampf(VoiceChat.own_level * MIC_METER_GAIN, 0.0, 1.0)
+		_incoming_voice_label.text = _incoming_voice_text()
+
+
+## e.g. "Gelen ses: Gonc 0.12 · Abdulalim — · Ulas —" ("—" = nothing in the last second).
+func _incoming_voice_text() -> String:
+	var parts := PackedStringArray()
+	for peer_id: int in Network.roster:
+		if peer_id == multiplayer.get_unique_id():
+			continue
+		var level := VoiceChat.incoming_level(peer_id)
+		var shown := "—" if level < 0.0 else "%.2f" % level
+		parts.append("%s %s" % [Network.roster[peer_id]["name"], shown])
+	return "Gelen ses: " + " · ".join(parts)
 
 
 func _on_voice_received(peer_id: int, frames: PackedVector2Array, level: float) -> void:

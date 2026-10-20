@@ -3,15 +3,16 @@ extends Node3D
 ## Grey-box stand-in for a monkey: body, head, a floating label, and a voice
 ## that comes from its head while the mouth follows how loud it is.
 
-const MOUTH_CLOSED := 0.15
+const MOUTH_CLOSED := 0.1
 ## Speech is quiet in RMS terms (around 0.05-0.2), so scale it up for the mouth.
-const MOUTH_GAIN := 6.0
+## Calibrate with the HUD's incoming-voice line once real Steam levels are known.
+const MOUTH_GAIN := 10.0
 ## How fast the mouth closes when the voice stops, in "fully open" per second.
 const MOUTH_CLOSE_SPEED := 5.0
 const VOICE_BUFFER_SECONDS := 0.4
 ## The name turns this colour while the monkey talks, to see at a glance who is speaking.
 const SPEAKING_COLOR := Color(1.0, 0.85, 0.3)
-const SPEAKING_THRESHOLD := 0.2
+const SPEAKING_THRESHOLD := 0.15
 
 var _player_name := ""
 var _status := ""
