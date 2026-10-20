@@ -1,0 +1,16 @@
+# İşletim sistemi
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Godot (motor kararı kesinleşince gözden geçirilecek)
+.godot/
+*.tmp
+
+# Build çıktıları
+build/
+exports/
+
+# Python araçları
+__pycache__/
+.venv/
