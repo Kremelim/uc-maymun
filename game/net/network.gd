@@ -1,0 +1,183 @@
+extends Node
+## Autoload "Network": connections and the lobby roster.
+## The host is the authority: it assigns seats and starts the game; clients only ask.
+
+signal roster_changed(roster: Dictionary)
+signal connection_failed(reason: String)
+signal disconnected(reason: String)
+
+const LOBBY_SCENE := "res://features/lobby/lobby.tscn"
+const TABLE_SCENE := "res://features/table/table.tscn"
+const MAX_NAME_LENGTH := 16
+
+## peer_id -> {"name": String, "seat": int}. The host syncs it, so it is identical on every peer.
+var roster: Dictionary = {}
+var game_in_progress := false
+## Shown by the lobby after being sent back there (e.g. "the host left").
+var last_message := ""
+## --auto-host / --auto-join run once per launch, not every time the lobby reloads.
+var auto_connect_used := false
+
+var _is_host := false
+var _pending_name := ""
+
+
+func _ready() -> void:
+	# Clients talk only to the host: no client-to-client messages relayed through it.
+	(multiplayer as SceneMultiplayer).server_relay = false
+	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
+	multiplayer.connected_to_server.connect(_on_connected_to_server)
+	multiplayer.connection_failed.connect(_on_connection_failed)
+	multiplayer.server_disconnected.connect(_on_server_disconnected)
+	if CmdArgs.has_flag("--e2e"):
+		var probe: Node = load("res://tests/e2e/e2e_probe.gd").new()
+		probe.name = "E2EProbe"
+		get_tree().root.add_child.call_deferred(probe)
+
+
+func is_host() -> bool:
+	return _is_host
+
+
+func seat_of(peer_id: int) -> int:
+	if not roster.has(peer_id):
+		return -1
+	return roster[peer_id]["seat"]
+
+
+func local_seat() -> int:
+	return seat_of(multiplayer.get_unique_id())
+
+
+func host_game(player_name: String, port: int) -> bool:
+	var peer := PeerFactory.create_host(port, Session.RULES.max_players - 1)
+	if peer == null:
+		connection_failed.emit("Port %d açılamadı." % port)
+		return false
+	multiplayer.multiplayer_peer = peer
+	_is_host = true
+	roster = {1: {"name": _clean_name(player_name), "seat": 0}}
+	roster_changed.emit(roster)
+	return true
+
+
+func join_game(address: String, port: int, player_name: String) -> bool:
+	var peer := PeerFactory.create_client(address, port)
+	if peer == null:
+		connection_failed.emit("%s:%d adresine bağlanılamadı." % [address, port])
+		return false
+	multiplayer.multiplayer_peer = peer
+	_is_host = false
+	_pending_name = _clean_name(player_name)
+	return true
+
+
+## Host only. Seats are packed to 0..n-1 first so the rules engine sees contiguous seats.
+func start_game() -> void:
+	if not _is_host or game_in_progress or roster.size() < Session.RULES.min_players:
+		return
+	game_in_progress = true
+	var peers: Array = roster.keys()
+	peers.sort_custom(func(a: int, b: int) -> bool: return roster[a]["seat"] < roster[b]["seat"])
+	for i in peers.size():
+		roster[peers[i]]["seat"] = i
+	_sync_roster.rpc(roster)
+	_start_game.rpc()
+	Session.host_begin(roster, int(CmdArgs.value("--seed", "-1")))
+
+
+## Leaves the table (or stops hosting) and goes back to the lobby.
+func leave(message: String = "") -> void:
+	multiplayer.multiplayer_peer.close()
+	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
+	_is_host = false
+	roster = {}
+	game_in_progress = false
+	last_message = message
+	Session.reset()
+	get_tree().change_scene_to_file(LOBBY_SCENE)
+
+
+func _on_connected_to_server() -> void:
+	_register.rpc_id(1, _pending_name)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _register(player_name: String) -> void:
+	if not _is_host:
+		return
+	var sender := multiplayer.get_remote_sender_id()
+	if roster.has(sender):
+		return
+	var seat := _free_seat()
+	if game_in_progress or seat == -1:
+		_rejected.rpc_id(sender, "Masa dolu ya da oyun çoktan başladı.")
+		return
+	roster[sender] = {"name": _clean_name(player_name), "seat": seat}
+	_sync_roster.rpc(roster)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rejected(reason: String) -> void:
+	leave(reason)
+
+
+@rpc("authority", "call_local", "reliable")
+func _sync_roster(new_roster: Dictionary) -> void:
+	roster = new_roster
+	roster_changed.emit(roster)
+
+
+@rpc("authority", "call_local", "reliable")
+func _start_game() -> void:
+	game_in_progress = true
+	get_tree().change_scene_to_file(TABLE_SCENE)
+
+
+@rpc("authority", "call_local", "reliable")
+func _abort_game(reason: String) -> void:
+	game_in_progress = false
+	last_message = reason
+	Session.reset()
+	get_tree().change_scene_to_file(LOBBY_SCENE)
+
+
+func _on_peer_disconnected(peer_id: int) -> void:
+	# Deferred: when several peers drop in the same network poll, all of them are
+	# gone by then, so we never send to a peer that is already disconnected.
+	_handle_peer_left.call_deferred(peer_id)
+
+
+func _handle_peer_left(peer_id: int) -> void:
+	if not _is_host or not roster.has(peer_id):
+		return
+	var who: String = roster[peer_id]["name"]
+	roster.erase(peer_id)
+	_sync_roster.rpc(roster)
+	if game_in_progress:
+		# Spike behaviour: the match ends. Bot takeover or pausing comes later.
+		_abort_game.rpc("%s masadan kalktı, oyun bitti." % who)
+
+
+func _on_connection_failed() -> void:
+	leave("Bağlantı kurulamadı.")
+
+
+func _on_server_disconnected() -> void:
+	disconnected.emit("Host masadan kalktı.")
+	leave("Host masadan kalktı.")
+
+
+func _free_seat() -> int:
+	var taken: Array = []
+	for info: Dictionary in roster.values():
+		taken.append(info["seat"])
+	for seat in Session.RULES.max_players:
+		if seat not in taken:
+			return seat
+	return -1
+
+
+func _clean_name(player_name: String) -> String:
+	var cleaned := player_name.strip_edges().left(MAX_NAME_LENGTH)
+	return cleaned if cleaned != "" else "Maymun"

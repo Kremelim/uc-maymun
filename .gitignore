@@ -14,3 +14,6 @@ exports/
 # Python araçları
 __pycache__/
 .venv/
+
+# CI Godot binary
+.godot-bin/

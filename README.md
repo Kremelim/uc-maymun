@@ -11,6 +11,7 @@ Dört maymun, tek masa, ortak bir borç: borcu birlikte ödeyin, cebe en çok pa
 - [Yol haritası](docs/yol-haritasi.md)
 - [Kurallar v0.1 (kağıt prototip)](docs/gdd/kurallar-v0.1.md)
 - [ADR-0001: Oyun motoru](docs/adr/0001-oyun-motoru.md)
+- [M1 teknik spike](docs/spike-m1.md)
 - [Playtest şablonu](docs/playtests/_sablon.md)
 - [Ekip sözleşmesi kontrol listesi](docs/ekip-sozlesmesi.md)
 
@@ -30,7 +31,11 @@ Dört maymun, tek masa, ortak bir borç: borcu birlikte ödeyin, cebe en çok pa
    Komut satırı yerine arayüz isterseniz [GitHub Desktop](https://desktop.github.com/) da kullanılabilir.
 2. [Godot 4.7.2-stable](https://godotengine.org/download/archive/4.7.2-stable/) indirin. Standart sürümü seçin, .NET sürümünü değil. Kurulum yok; zip'i açıp çalıştırmak yeterli.
    Herkes aynı sürümü kullanmalı.
-3. Repoyu klonlayın:
+3. Repoyu **OneDrive'ın senkronize etmediği** bir klasöre klonlayın (ör. `C:\Users\<ad>\game-project\`).
+   OneDrive ile senkronize olan Belgeler veya Masaüstü klasörleri Git ve Godot'un `.godot/` önbelleğiyle çakışır.
    ```
    git clone https://github.com/Kremelim/uc-maymun
    ```
+4. Godot'u açın, Project Manager'da **Import** → `uc-maymun/game/project.godot` → **Import & Edit**.
+
+Teknik spike'ı 4 pencereyle denemek için: [docs/spike-m1.md](docs/spike-m1.md).
