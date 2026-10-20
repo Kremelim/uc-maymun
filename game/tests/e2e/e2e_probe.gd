@@ -5,6 +5,8 @@ extends Node
 ##   clients: --e2e --auto-join
 ## The host declares honestly, every client hides one coin and reports what it
 ## received. The host checks the reports against its own truth and exits 0 or 1.
+## Checked: incomes reach only their owner, declarations stay hidden until all
+## are in, and the revealed table matches what was declared.
 
 const TIMEOUT_SEC := 30.0
 
@@ -12,6 +14,8 @@ var _expected_clients := 0
 var _reports: Dictionary = {}  # peer_id -> report
 var _private_seats_seen: Array = []
 var _last_income := -1
+var _private_declaration := TableState.NOT_DECLARED
+var _saw_amounts_before_reveal := false
 var _declared := false
 var _reported := false
 var _finished := false
@@ -26,8 +30,10 @@ func _ready() -> void:
 
 
 func _on_private_view(view: Dictionary) -> void:
-	_private_seats_seen.append(view["seat"])
+	if view["seat"] not in _private_seats_seen:
+		_private_seats_seen.append(view["seat"])
 	_last_income = view["income"]
+	_private_declaration = view["declaration"]
 	if not _declared:
 		_declared = true
 		var amount := _last_income if Network.is_host() else _last_income - 1
@@ -35,18 +41,21 @@ func _on_private_view(view: Dictionary) -> void:
 
 
 func _on_public_state(snapshot: Dictionary) -> void:
+	if not snapshot.has("missing") and snapshot.has("declarations"):
+		_saw_amounts_before_reveal = true
 	if Network.is_host():
 		_check_reports.call_deferred()
 		return
-	var my_seat := Network.local_seat()
-	if _reported or _last_income < 0 or snapshot["declarations"][my_seat] == TableState.NOT_DECLARED:
+	if _reported or _last_income < 0 or not snapshot.has("declarations"):
 		return
 	_reported = true
 	_report.rpc_id(1, {
 		"private_seats": _private_seats_seen,
 		"income": _last_income,
-		"declaration_seen": snapshot["declarations"][my_seat],
+		"private_declaration": _private_declaration,
+		"declaration_seen": snapshot["declarations"][Network.local_seat()],
 		"public_has_income": _has_key(snapshot, "income"),
+		"saw_amounts_before_reveal": _saw_amounts_before_reveal,
 	})
 
 
@@ -73,10 +82,14 @@ func _check_reports() -> void:
 			errors.append("peer %d (seat %d) received private views for seats %s" % [peer_id, seat, report["private_seats"]])
 		if report["income"] != truth.income_of(seat):
 			errors.append("peer %d saw income %d, truth is %d" % [peer_id, report["income"], truth.income_of(seat)])
+		if report["private_declaration"] != truth.income_of(seat) - 1:
+			errors.append("peer %d did not get its own declaration back privately" % peer_id)
 		if report["declaration_seen"] != truth.income_of(seat) - 1:
 			errors.append("peer %d declaration did not reach the table" % peer_id)
 		if report["public_has_income"]:
 			errors.append("public snapshot sent to peer %d contains an income" % peer_id)
+		if report["saw_amounts_before_reveal"]:
+			errors.append("peer %d saw declaration amounts before everyone declared" % peer_id)
 	if snapshot["missing"] != _expected_clients:
 		errors.append("missing coins: expected %d, got %d" % [_expected_clients, snapshot["missing"]])
 	_finish(errors)

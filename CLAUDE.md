@@ -33,6 +33,7 @@
   - İçe aktar (class cache için, testlerden önce şart): `godot --headless --path game --import`
   - Unit testler: `godot --headless --path game --script res://tests/run_unit_tests.gd`
   - E2E (1 host + 3 istemci, gerçek ENet): `GODOT=godot game/tests/e2e/run_e2e.sh`
+  - Görsel kontrol (masayı Xvfb altında çizip PNG kaydeder): kullanımı `game/tests/visual/render_table.gd` başında. Arayüz değiştiğinde çalıştırıp görüntüye bak.
 - CI (`.github/workflows/ci.yml`) her PR'da bu üçünü çalıştırır.
 
 ## Çalışma kuralları

@@ -70,18 +70,23 @@ func _apply_declare(peer_id: int, amount: int) -> void:
 	var seat := Network.seat_of(peer_id)
 	if seat == -1 or not _state.declare(seat, amount):
 		return  # Invalid intent: ignored, the host's state stays authoritative.
+	_push_private(seat)
 	_push_public()
 
 
 func _push_all() -> void:
 	for seat: int in _seat_to_peer:
-		var peer_id: int = _seat_to_peer[seat]
-		var view := _state.private_view(seat)
-		if peer_id == multiplayer.get_unique_id():
-			_receive_private(view)
-		else:
-			_receive_private.rpc_id(peer_id, view)
+		_push_private(seat)
 	_push_public()
+
+
+func _push_private(seat: int) -> void:
+	var peer_id: int = _seat_to_peer[seat]
+	var view := _state.private_view(seat)
+	if peer_id == multiplayer.get_unique_id():
+		_receive_private(view)
+	else:
+		_receive_private.rpc_id(peer_id, view)
 
 
 func _push_public() -> void:

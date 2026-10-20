@@ -5,6 +5,8 @@ extends Node3D
 const MONKEY_SCENE: PackedScene = preload("res://features/table/monkey_placeholder.tscn")
 const SEAT_RADIUS := 1.6
 const EYE_HEIGHT := 1.35
+## The camera sits a little behind the seat so the neighbours fit in view.
+const CAMERA_BACK := 0.5
 const LOOK_TARGET := Vector3(0, 0.8, 0)
 
 var _monkeys: Dictionary = {}  # seat -> MonkeyPlaceholder
@@ -40,7 +42,7 @@ func _build_seats() -> void:
 		var floor_position := _seat_position(seat)
 		if seat == my_seat:
 			# First person: we sit here, so we see the table instead of our own monkey.
-			_camera.position = floor_position + Vector3.UP * EYE_HEIGHT
+			_camera.position = floor_position * (1.0 + CAMERA_BACK / SEAT_RADIUS) + Vector3.UP * EYE_HEIGHT
 			_camera.look_at(LOOK_TARGET)
 			continue
 		var monkey := MONKEY_SCENE.instantiate() as MonkeyPlaceholder
@@ -60,26 +62,45 @@ func _on_public_state_changed(snapshot: Dictionary) -> void:
 	if snapshot.is_empty():
 		_table_label.text = "Masa hazırlanıyor…"
 		return
-	var declarations: PackedInt32Array = snapshot["declarations"]
+	var revealed := snapshot.has("declarations")
+	var declared: Array = snapshot["declared"]
 	for seat: int in _monkeys:
-		_monkeys[seat].set_declaration(declarations[seat])
+		var status := "düşünüyor…"
+		if revealed:
+			status = "beyan: %d" % snapshot["declarations"][seat]
+		elif declared[seat]:
+			status = "beyanını verdi"
+		_monkeys[seat].set_status(status)
 	var lines := PackedStringArray(["Tur %d · Masaya dağıtılan toplam: %d" % [snapshot["round"], snapshot["total_income"]]])
-	var my_seat := Network.local_seat()
-	if my_seat >= 0 and declarations[my_seat] != TableState.NOT_DECLARED:
-		lines.append("Senin beyanın: %d" % declarations[my_seat])
-	if snapshot.has("missing"):
-		lines.append("KAYIP JETON: %d" % snapshot["missing"])
+	if revealed:
+		lines.append(_missing_text(snapshot["missing"]))
 	else:
-		lines.append("Beyanlar bekleniyor…")
+		lines.append("Beyanlar bekleniyor (%d/%d)…" % [declared.count(true), declared.size()])
 	_table_label.text = "\n".join(lines)
 	_declare_spin.max_value = snapshot["total_income"]
+	_declare_button.disabled = revealed
+	# The private panel's "(will be revealed)" note depends on the public state.
+	_on_private_view_changed(Session.private_view)
 
 
 func _on_private_view_changed(view: Dictionary) -> void:
 	if view.is_empty():
 		_income_label.text = "Gelir bekleniyor…"
 		return
-	_income_label.text = "Gelirin: %d jeton (bunu sadece sen görüyorsun)" % view["income"]
+	var text := "Gelirin: %d jeton (bunu sadece sen görüyorsun)" % view["income"]
+	if view["declaration"] != TableState.NOT_DECLARED:
+		text += "\nSenin beyanın: %d" % view["declaration"]
+		if not Session.public_state.has("declarations"):
+			text += " (herkes beyan edince açılacak)"
+	_income_label.text = text
+
+
+static func _missing_text(missing: int) -> String:
+	if missing > 0:
+		return "KAYIP JETON: %d" % missing
+	if missing < 0:
+		return "BEYAN FAZLASI: %d (biri aldığından fazlasını beyan etti)" % -missing
+	return "Kayıp jeton yok. Herkes doğru söylüyor… ya da öyle görünüyor."
 
 
 func _on_declare_pressed() -> void:

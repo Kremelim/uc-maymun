@@ -2,7 +2,7 @@ extends TestSuite
 
 const RULES: RulesConfig = preload("res://data/rules_v0_1.tres")
 
-var _undeclared := PackedInt32Array([-1, -1, -1, -1])
+var _nobody_declared: Array = [false, false, false, false]
 
 
 func _dealt_table(seats: int, match_seed: int) -> TableState:
@@ -66,16 +66,61 @@ func test_shuffle_puts_every_value_in_every_seat() -> void:
 func test_public_snapshot_never_contains_incomes() -> void:
 	var table := _dealt_table(4, 7)
 	var snapshot := table.public_snapshot()
-	assert_eq(snapshot.keys(), ["round", "total_income", "declarations"], "public keys before declarations")
-	assert_eq(snapshot["declarations"], _undeclared, "nobody has declared yet")
+	assert_eq(snapshot.keys(), ["round", "total_income", "declared"], "public keys before declarations")
+	assert_eq(snapshot["declared"], _nobody_declared, "nobody has declared yet")
 
 
-func test_private_view_shows_only_own_income() -> void:
+func test_private_view_shows_only_own_income_and_declaration() -> void:
 	var table := _dealt_table(4, 7)
+	table.declare(2, 3)
 	for seat in 4:
 		var view := table.private_view(seat)
-		assert_eq(view.keys(), ["seat", "income"], "private keys for seat %d" % seat)
+		assert_eq(view.keys(), ["seat", "income", "declaration"], "private keys for seat %d" % seat)
 		assert_eq(view["income"], table.income_of(seat), "income in private view of seat %d" % seat)
+	assert_eq(table.private_view(2)["declaration"], 3, "own declaration")
+	assert_eq(table.private_view(1)["declaration"], TableState.NOT_DECLARED, "someone else's declaration")
+
+
+func test_declarations_stay_hidden_until_everyone_declares() -> void:
+	# Rules v0.1: slips are written in secret and revealed at the same time.
+	var table := _dealt_table(4, 11)
+	for seat in 3:
+		table.declare(seat, 2)
+	var snapshot := table.public_snapshot()
+	assert_true(not snapshot.has("declarations"), "amounts must stay hidden while someone is still declaring")
+	assert_true(not snapshot.has("missing"), "missing must wait for the last declaration")
+	assert_eq(snapshot["declared"], [true, true, true, false], "who has declared is public")
+
+
+func test_missing_coins_after_reveal() -> void:
+	var table := _dealt_table(4, 11)
+	for seat in 3:
+		table.declare(seat, table.income_of(seat))
+	table.declare(3, table.income_of(3) - 1)  # seat 3 hides one coin
+	var snapshot := table.public_snapshot()
+	assert_eq(snapshot["missing"], 1, "missing coins")
+	assert_eq(snapshot["declarations"][3], table.income_of(3) - 1, "revealed declaration of seat 3")
+
+
+func test_over_declaring_gives_negative_missing() -> void:
+	var table := _dealt_table(4, 11)
+	for seat in 4:
+		table.declare(seat, table.income_of(seat))
+	assert_eq(table.public_snapshot()["missing"], 0, "everyone honest")
+	table = _dealt_table(4, 11)
+	for seat in 4:
+		table.declare(seat, table.income_of(seat) + (2 if seat == 0 else 0))
+	assert_eq(table.public_snapshot()["missing"], -2, "seat 0 over-declared by two")
+
+
+func test_declarations_lock_after_reveal() -> void:
+	var table := _dealt_table(4, 11)
+	table.declare(0, 1)
+	table.declare(0, 2)  # changing your mind before the reveal is fine
+	for seat in range(1, 4):
+		table.declare(seat, 1)
+	assert_true(not table.declare(0, 5), "no changes after the reveal")
+	assert_eq(table.public_snapshot()["declarations"], PackedInt32Array([2, 1, 1, 1]), "revealed declarations")
 
 
 func test_invalid_declarations_are_rejected() -> void:
@@ -84,16 +129,7 @@ func test_invalid_declarations_are_rejected() -> void:
 	assert_true(not table.declare(4, 2), "seat out of range must be rejected")
 	assert_true(not table.declare(0, -1), "negative amount must be rejected")
 	assert_true(not table.declare(0, 21), "more than the table total must be rejected")
-	assert_eq(table.public_snapshot()["declarations"], _undeclared, "rejected declarations change nothing")
-
-
-func test_missing_coins_appear_only_after_everyone_declares() -> void:
-	var table := _dealt_table(4, 11)
-	for seat in 3:
-		table.declare(seat, table.income_of(seat))
-	assert_true(not table.public_snapshot().has("missing"), "missing must wait for the last declaration")
-	table.declare(3, table.income_of(3) - 1)  # seat 3 hides one coin
-	assert_eq(table.public_snapshot()["missing"], 1, "missing coins")
+	assert_eq(table.public_snapshot()["declared"], _nobody_declared, "rejected declarations change nothing")
 
 
 func test_new_round_clears_declarations() -> void:
@@ -101,10 +137,12 @@ func test_new_round_clears_declarations() -> void:
 	rng.seed = 5
 	var table := TableState.new(RULES, 4)
 	table.deal(rng)
-	table.declare(0, 1)
+	for seat in 4:
+		table.declare(seat, 1)
 	table.deal(rng)
 	assert_eq(table.round_number, 2, "round number")
-	assert_eq(table.public_snapshot()["declarations"], _undeclared, "declarations after a new deal")
+	assert_eq(table.public_snapshot()["declared"], _nobody_declared, "declarations after a new deal")
+	assert_true(table.declare(0, 1), "declaring is open again")
 
 
 func test_fewer_seats_get_a_slice_of_the_set() -> void:
