@@ -31,6 +31,17 @@ height = 0.75
 material = SubResource("Mat_floor")
 size = Vector2(12, 12)
 
+[sub_resource type="StyleBoxFlat" id="Style_hud"]
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+bg_color = Color(0.07, 0.06, 0.05, 0.92)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
 [node name="Table" type="Node3D"]
 script = ExtResource("1_table")
 
@@ -60,14 +71,20 @@ mesh = SubResource("Mesh_table_leg")
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 3)
 current = true
+fov = 65.0
 
 [node name="Hud" type="CanvasLayer" parent="."]
 
 [node name="Panel" type="PanelContainer" parent="Hud"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
 offset_left = 12.0
-offset_top = 12.0
+offset_top = -12.0
 offset_right = 392.0
-offset_bottom = 232.0
+offset_bottom = -12.0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("Style_hud")
 
 [node name="VBox" type="VBoxContainer" parent="Hud/Panel"]
 layout_mode = 2

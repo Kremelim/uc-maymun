@@ -84,11 +84,16 @@ func _port() -> int:
 
 
 ## With --win=N (0-3), tiles the window into a 2x2 grid so four instances fit on one screen.
+## Skipped when the editor embeds the game, since the editor owns that window.
 func _place_window() -> void:
 	var index := int(CmdArgs.value("--win", "-1"))
-	if index < 0 or DisplayServer.get_name() == "headless":
+	if index < 0 or DisplayServer.get_name() == "headless" or Engine.is_embedded_in_editor():
 		return
 	var screen := DisplayServer.screen_get_usable_rect()
-	var half := screen.size / 2
-	DisplayServer.window_set_size(half)
-	DisplayServer.window_set_position(screen.position + Vector2i(index % 2 * half.x, int(index / 2.0) * half.y))
+	var cell_size := screen.size / 2
+	var cell := screen.position + Vector2i(index % 2 * cell_size.x, int(index / 2.0) * cell_size.y)
+	# Size and position apply to the content area, so leave room for the title bar and borders.
+	var border := DisplayServer.window_get_size_with_decorations() - DisplayServer.window_get_size()
+	var inset := DisplayServer.window_get_position() - DisplayServer.window_get_position_with_decorations()
+	DisplayServer.window_set_size(cell_size - border)
+	DisplayServer.window_set_position(cell + inset)

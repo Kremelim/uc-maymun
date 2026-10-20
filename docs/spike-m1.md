@@ -19,7 +19,10 @@ Ne var:
 - **Lobi:** masa kur (host) veya masaya katıl, oyuncu listesi, "Oyunu başlat".
 - **3D masa:** her oyuncu kendi koltuğundan bakıyor (birinci şahıs), diğerleri kutu-maymun.
 - **Gizli gelir:** host her tur bir dağıtım seti çekip karıştırıyor ve her oyuncuya sadece kendi gelirini gönderiyor.
-- **Beyan:** oyuncu beyanını gönderiyor, host doğruluyor. Herkes beyan edince "KAYIP JETON" görünüyor.
+- **Beyan:** oyuncu beyanını gönderiyor, host doğruluyor. Kurallardaki kağıtlar gibi:
+  - herkes beyanını verene kadar diğerleri sadece "beyanını verdi" bilgisini görüyor;
+  - son beyan gelince hepsi aynı anda açılıyor ve kilitleniyor;
+  - açılıştan sonra "KAYIP JETON" (ya da eksiye düşerse "BEYAN FAZLASI") görünüyor.
 
 ### Kod nerede
 
@@ -67,7 +70,13 @@ ne aldığını raporlar. Host kontrol eder:
 - beyanlar masaya ulaştı mı;
 - kayıp jeton doğru mu.
 
-Test bilerek bozulmuş bir sürümde (herkese her gelir gönderiliyor) sızıntıyı yakalıyor.
+Ayrıca açılıştan önce kimsenin başkasının beyan miktarını görmediğini de kontrol eder.
+Test, bilerek bozulmuş iki sürümde sızıntıyı yakalıyor: gelirlerin herkese gönderildiği bir sürüm ve beyanların erken açıldığı bir sürüm.
+
+### Görsel kontrol
+
+`tests/visual/render_table.gd`, masayı sahte verilerle bir koltuktan çizip PNG olarak kaydeder.
+Arayüz değişikliklerini 4 pencere açmadan kontrol etmek için. Kullanımı dosyanın başında.
 
 ## Bölüm B — Steam (sıradaki)
 
@@ -89,3 +98,5 @@ Steam bunu bizim yerimize hallediyor.
 - Arayüz metinleri kodda Türkçe yazılı. Çeviri sistemi (TR/EN) M2'de.
 - Host her şeyi bilir; arkadaşlar arasında kabul edilebilir. Açık lobiler için yeniden değerlendirilecek.
 - Kurallardan sadece gelir ve beyan var. Katkı, denetim, rüşvet ve kefil M2'de, kağıt prototipten sonra.
+- **Fazla beyan serbest** (aldığından fazlasını beyan etmek). İlk 4 pencereli denemede hemen yaşandı.
+  Kurallarda açık bir uç durum; Kerem Gönç karar verene kadar oyun buna izin veriyor ve "BEYAN FAZLASI" diye gösteriyor.

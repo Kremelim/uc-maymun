@@ -43,10 +43,13 @@ func income_of(seat: int) -> int:
 
 
 ## Returns false and changes nothing when the declaration is not allowed.
+## Declarations can change until the last player declares; then all are revealed and locked.
 func declare(seat: int, amount: int) -> bool:
 	if seat < 0 or seat >= seat_count:
 		return false
 	if amount < 0 or amount > total_income():
+		return false
+	if all_declared():
 		return false
 	_declarations[seat] = amount
 	return true
@@ -57,23 +60,28 @@ func all_declared() -> bool:
 
 
 ## Everything every player may see. Must never contain incomes.
+## Like the paper slips in the rules, amounts stay hidden until everyone has declared.
 func public_snapshot() -> Dictionary:
+	var declared: Array = []
+	for amount in _declarations:
+		declared.append(amount != NOT_DECLARED)
 	var snapshot := {
 		"round": round_number,
 		"total_income": total_income(),
-		"declarations": _declarations.duplicate(),
+		"declared": declared,
 	}
 	if all_declared():
 		var declared_sum := 0
 		for amount in _declarations:
 			declared_sum += amount
+		snapshot["declarations"] = _declarations.duplicate()
 		snapshot["missing"] = total_income() - declared_sum
 	return snapshot
 
 
-## What only the player sitting in `seat` may see.
+## What only the player sitting in `seat` may see, including their own unrevealed declaration.
 func private_view(seat: int) -> Dictionary:
-	return {"seat": seat, "income": _incomes[seat]}
+	return {"seat": seat, "income": _incomes[seat], "declaration": _declarations[seat]}
 
 
 ## Fisher-Yates with our own RNG: Array.shuffle() uses the global RNG and would break determinism.
