@@ -83,7 +83,7 @@ Arayüz değişikliklerini 4 pencere açmadan kontrol etmek için. Kullanımı d
 - [x] GodotSteam GDExtension **4.22.1** `game/addons/godotsteam/` altında (sadece Windows ve Linux dosyaları, LFS ile)
 - [x] Test App ID 480 ile Steam'i başlatma; Steam yoksa yerel ağ moduna düşme
 - [x] Steam lobisi kurma, lobi koduyla katılma, Steam davetini kabul etme (`SteamMultiplayerPeer`)
-- [ ] **B1:** tek başına Windows'ta test (aşağıda)
+- [x] **B1:** tek başına Windows'ta test. Steam başlıyor, lobi kuruluyor, kod çıkıyor. Overlay editörden açılmadı (beklenen, aşağıda).
 - [ ] **B2:** bir arkadaşla, iki ayrı bilgisayardan test (aşağıda)
 - [ ] **B3:** SteamVoice ile 4 kişi konumsal ses + ağız animasyonu (sıradaki PR)
 
@@ -120,19 +120,33 @@ Bana gönder: 3. ve 4. adımın ekran görüntüsü. Bir şey ters giderse Godot
 
 Aynı bilgisayarda iki Steam hesabı birlikte çalışmaz. Arkadaşın Steam'de **arkadaş listende** olmalı, çünkü lobi sadece arkadaşlara açık.
 
-1. **Windows çıktısı al** (arkadaşına Godot kurdurmamak için):
-   - Project → **Export…** → **Add…** → **Windows Desktop**.
-   - Export template eksik derse: **Manage Export Templates → Download and Install**.
-     Godot 4.7 sadece gereken platformu indirir.
-   - **Export Project…** → repo dışında bir klasör seç (ör. `C:\Users\kerem\game-project\builds\`).
-     "Export With Debug" işaretli kalsın, hata olursa log için.
-   - Klasörde `.exe`, `.pck` ve GodotSteam DLL'leri olmalı. Klasörü zip'le, arkadaşına gönder.
+1. **Windows çıktısı al** (arkadaşına Godot kurdurmamak için). Menü adları Türkçe arayüze göre, parantez içinde İngilizcesi:
+   - **Dışa aktarma şablonlarını bir kez kur:**
+     - **Düzenleyici → Dışa Aktarma Şablonlarını Yönet…** (Editor → Manage Export Templates…) → **İndir ve Yükle** (Download and Install).
+     - "Beklenen yolda herhangi bir dışa aktarma şablonu bulunamadı" uyarısı bu yüzden çıkıyordu.
+   - **Proje → Dışa Aktar…** (Project → Export…) → **Windows Desktop** ön ayarı.
+     - **Export Path**'e klasör değil dosya yaz: `../../builds/UcMaymun.exe`.
+     - Yol `game/` klasörüne göre; bu `C:\Users\kerem\game-project\builds\` demek, yani repo dışında.
+   - **Projeyi Dışa Aktar…** (Export Project…). "Hata ayıklama ile dışa aktar" (Export With Debug) işaretli kalsın, hata olursa log için.
+   - `builds` klasöründe şunlar olmalı:
+     - `UcMaymun.exe`, `UcMaymun.console.exe` (logları siyah pencerede gösterir), `UcMaymun.pck`
+     - `libgodotsteam.windows.template_debug.x86_64.dll`, `steam_api64.dll`
+     Klasörü zip'le, arkadaşına gönder.
+   - Ön ayar `game/export_presets.cfg` dosyasına kaydedilir. GitHub Desktop'ta yeni dosya olarak görünür.
+     Bunu commit et: herkes aynı ayarla dışa aktarsın. Şifre veya anahtar içermez; Godot onları `.godot/` altında tutar.
 2. İkiniz de Steam'i açın. Sen dışa aktardığın `.exe`'yi ya da editörü çalıştır, arkadaşın kendi `.exe`'sini.
 3. Sen: **Steam masası kur** → **Kodu kopyala** → kodu Discord'dan arkadaşına at.
 4. Arkadaşın: kodu yapıştırıp **Kodla katıl**. İki ekranda da iki oyuncu görünmeli.
 5. Sen: **Oyunu başlat**. Herkes sadece kendi gelirini görmeli; beyanlar herkes beyan edince açılmalı.
 6. Davet yolunu da dene: masadan kalkın, yeniden **Steam masası kur** → **Arkadaş davet et**.
    Arkadaşın Steam'den daveti kabul edince (oyunu açıkken) masaya düşmeli.
+   Overlay açılmazsa **Shift+Tab** dene. O da olmazsa Steam'in kendi arkadaş listesinden arkadaşına sağ tıkla → oyuna davet et.
+
+### Steam overlay neden açılmıyor?
+
+Steam overlay'i, Steam'in kendisinin başlattığı oyunlara enjekte edilir. Oyunu Godot editöründen ya da `.exe`'ye çift tıklayarak açınca Steam oyunu başlatmamış olur ve overlay çoğu zaman gelmez. Bu bizim kodumuzdaki bir hata değil.
+
+Kendi App ID'mizi aldığımızda (Steam Direct, 100 $) oyun Steam kütüphanesinden açılacak ve overlay ile davetler normal çalışacak. O zamana kadar güvenilir yol **lobi kodu**.
 
 Bana gönder: hangi adımlar çalıştı, hangileri çalışmadı, her iki taraftan ekran görüntüsü.
 

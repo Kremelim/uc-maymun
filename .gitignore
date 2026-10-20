@@ -3,9 +3,13 @@
 Thumbs.db
 desktop.ini
 
-# Godot (motor kararı kesinleşince gözden geçirilecek)
+# Godot
 .godot/
 *.tmp
+# Windows'ta editör GDExtension DLL'lerinin "~" önekli bir kopyasını yükler (asıl dosya kilitlenmesin diye)
+~*.dll
+# tests/lint_warnings.gd'nin geçici dosyası
+game/override.cfg
 
 # Build çıktıları
 build/

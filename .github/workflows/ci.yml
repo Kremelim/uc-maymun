@@ -41,6 +41,9 @@ jobs:
       - name: Import project
         run: timeout 300 "$GODOT" --headless --path game --import
 
+      - name: GDScript warnings (the editor shows them, headless runs do not)
+        run: timeout 120 "$GODOT" --headless --path game --script res://tests/lint_warnings.gd
+
       - name: Unit tests
         run: timeout 120 "$GODOT" --headless --path game --script res://tests/run_unit_tests.gd
 

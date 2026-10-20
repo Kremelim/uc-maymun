@@ -137,6 +137,7 @@ func _place_window() -> void:
 	if index < 0 or DisplayServer.get_name() == "headless" or Engine.is_embedded_in_editor():
 		return
 	var screen := DisplayServer.screen_get_usable_rect()
+	@warning_ignore("integer_division")  # whole pixels are what we want
 	var cell_size := screen.size / 2
 	var cell := screen.position + Vector2i(index % 2 * cell_size.x, int(index / 2.0) * cell_size.y)
 	# Size and position apply to the content area, so leave room for the title bar and borders.
