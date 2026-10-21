@@ -83,8 +83,9 @@ func vouch_target(view: Dictionary) -> int:
 	return best
 
 
-## Its share of the installment as implied by what it declared, plus part of the
-## gap the table's declarations leave open.
+## What it adds on top of the minimum it already paid. It aims for its share of the
+## installment as implied by what it declared, plus part of the gap the table's
+## declarations leave open.
 func contribution(view: Dictionary) -> int:
 	var due: int = view["installment_due"]
 	var total: int = view["total_income"]
@@ -92,11 +93,12 @@ func contribution(view: Dictionary) -> int:
 		return 0
 	var own_share := float(due) * int(view["my_declaration"]) / total
 	var gap := float(due) * maxi(int(view["missing"]), 0) / total
-	var amount := ceili(own_share * share_factor + gap * cover_gap / int(view["seat_count"]))
-	if spiteful and _is_last_round(view) and not _expects_to_win(view, amount):
-		amount = 0
+	var aim := ceili(own_share * share_factor + gap * cover_gap / int(view["seat_count"]))
+	var extra := maxi(aim - (view["minimums"] as PackedInt32Array)[view["seat"]], 0)
+	if spiteful and _is_last_round(view) and not _expects_to_win(view, extra):
+		extra = 0
 		sank_the_table = true
-	return clampi(amount, 0, view["my_cash"])
+	return mini(extra, view["my_cash"])
 
 
 func choose_audit_target(view: Dictionary) -> int:
@@ -184,8 +186,8 @@ func _accessory_spend(view: Dictionary, seat: int) -> int:
 
 
 ## Rough guess: does it end richer than everyone else, from what others declared and spent?
-func _expects_to_win(view: Dictionary, my_contribution: int) -> bool:
-	var mine := int(view["my_cash"]) - my_contribution + _accessory_value(view, view["seat"])
+func _expects_to_win(view: Dictionary, my_extra: int) -> bool:
+	var mine := int(view["my_cash"]) - my_extra + _accessory_value(view, view["seat"])
 	for seat in int(view["seat_count"]):
 		if seat != view["seat"]:
 			var theirs := _explainable_cash(view, seat) + _accessory_value(view, seat)

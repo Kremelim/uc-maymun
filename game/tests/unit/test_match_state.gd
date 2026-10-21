@@ -1,7 +1,9 @@
 extends TestSuite
-## Rules v0.1 (docs/gdd/kurallar-v0.1.md) as executable checks. Seat 0 audits round 1.
+## The rules as executable checks. Most tests start from v0.1 (docs/gdd/kurallar-v0.1.md)
+## and turn on one v0.2 switch at a time. Seat 0 audits round 1.
 
 const RULES: RulesConfig = preload("res://data/rules_v0_1.tres")
+const RULES_V0_2: RulesConfig = preload("res://data/rules_v0_2.tres")
 
 
 func _match(rules: RulesConfig = RULES) -> MatchState:
@@ -54,6 +56,24 @@ func test_rules_data_matches_design_doc() -> void:
 	assert_eq(RULES.placement_points, PackedInt32Array([5, 3, 2, 1]), "placement points")
 	assert_eq(RULES.auditor_card_open, false, "variant off in v0.1")
 	assert_eq(RULES.min_contribution_ratio, 0.0, "variant off in v0.1")
+
+
+func test_v0_2_data_matches_design_doc() -> void:
+	assert_eq(RULES_V0_2.auditor_card_open, true, "the auditor's card is open")
+	assert_eq(RULES_V0_2.min_contribution_ratio, 0.6, "minimum contribution 60%")
+	assert_eq(RULES_V0_2.last_round_shop, false, "no shop after the last audit")
+	for property: String in ["min_players", "max_players", "round_count", "income_sets", "installment",
+			"shortfall_interest", "fine_multiplier", "audit_compensation", "vouch_reward",
+			"over_declaration_is_lie", "accessory_names", "accessory_prices", "accessory_values", "placement_points"]:
+		assert_eq(RULES_V0_2.get(property), RULES.get(property), "%s unchanged from v0.1" % property)
+	# kurallar-v0.2.md: at an honest table the minimums alone pay the installment.
+	var state := MatchState.new(RULES_V0_2, 4, 1)
+	for income_set in RULES_V0_2.income_sets:
+		var minimums := 0
+		for income in income_set:
+			minimums += state.minimum_for(income)
+		assert_true(minimums >= RULES_V0_2.installment and minimums <= RULES_V0_2.installment + 2,
+			"honest minimums for %s: %d" % [income_set, minimums])
 
 
 func test_same_seed_same_incomes() -> void:
@@ -281,15 +301,26 @@ func test_open_auditor_card_forbids_the_auditors_lie() -> void:
 	assert_true(state.declare(1, 2), "everyone else still can lie")
 
 
-func test_minimum_contribution() -> void:
+func test_minimums_are_paid_when_declarations_are_revealed() -> void:
 	var rules: RulesConfig = RULES.duplicate()
-	rules.min_contribution_ratio = 0.5
+	rules.min_contribution_ratio = 0.6
 	var state := _match(rules)
-	_set_incomes(state, [5, 5, 5, 1])
-	_declare_all(state, [5, 5, 5, 1])
+	_set_incomes(state, [7, 5, 5, 3])
+	assert_eq(state.minimum_for(7), 5, "60% of 7, rounded up")
+	assert_true(state.declare(0, 7), "first declaration")
+	assert_eq(state.pot, 0, "nothing is paid before the reveal")
+	for seat: int in [1, 2, 3]:
+		assert_true(state.declare(seat, [0, 5, 3, 8][seat]), "declare seat %d" % seat)
+	assert_eq(state.minimums, PackedInt32Array([5, 3, 2, 3]), "seat 3 over-declared and pays all it has")
+	assert_eq(state.pot, 13, "minimums are in the pot")
+	assert_eq(state.cash, PackedInt32Array([2, 2, 3, 0]), "and out of the pockets")
+	assert_eq(state.view_for(1)["minimums"], state.minimums, "minimums are public")
+	# Paid before negotiating, so emptying your pocket into a friend's cannot dodge it.
+	assert_true(state.transfer(0, 1, 2), "coins still pass under the table")
 	state.end_negotiation()
-	assert_eq(state.min_contribution(0), 3, "half of 5, rounded up")
-	assert_true(not state.contribute(0, 2), "below the minimum")
-	assert_true(state.contribute(0, 3), "the minimum")
-	state.cash[3] = 0
-	assert_eq(state.min_contribution(3), 0, "never more than the cash")
+	assert_true(not state.contribute(1, -1), "no negative extra")
+	assert_true(not state.contribute(1, 5), "the extra comes from the cash left")
+	_contribute_all(state, [0, 4, 0, 0])
+	assert_eq(state.contributions, PackedInt32Array([5, 7, 2, 3]), "contribution = minimum + extra")
+	assert_eq(state.pot, 17, "extras join the pot")
+	assert_eq(state.total_contributed, PackedInt32Array([5, 7, 2, 3]), "the tie-break counts minimums too")
