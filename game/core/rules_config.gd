@@ -5,11 +5,8 @@ extends Resource
 ## Defaults are rules v0.1; data/rules_v0_3.tres holds the current rules.
 
 @export var max_players: int = 4
-## With two players the known total gives away the other player's income.
+## With two players the known total gives away the other player's income. Bots count.
 @export var min_players: int = 3
-## Spike lobby only, so two people can test networking and voice. Goes away
-## when the full rules move into the game (M2).
-@export var spike_min_players: int = 2
 @export var round_count: int = 4
 ## One income per seat. Players learn only a set's total, never who got what.
 @export var income_sets: Array[PackedInt32Array] = []
@@ -50,6 +47,10 @@ extends Resource
 ## Whether the shop opens after the last round's audit too. Off in v0.2: with no
 ## audit left, buying is a free bonus rather than a risk.
 @export var last_round_shop: bool = true
+
+@export_group("Pacing")
+## The rules give the negotiation 2 minutes; it ends sooner when everyone is ready.
+@export var negotiation_seconds: int = 120
 
 @export_group("Scoring")
 ## Night score per match by placement, when the table survives. A sunk table scores 0 for all.

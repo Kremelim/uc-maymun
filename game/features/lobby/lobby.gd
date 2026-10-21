@@ -1,5 +1,5 @@
 extends Control
-## Spike lobby: host or join a table through Steam, or on the local network for testing.
+## Lobby: host or join a table through Steam, or on the local network for testing.
 
 @onready var _name_edit: LineEdit = %NameEdit
 @onready var _steam_status_label: Label = %SteamStatusLabel
@@ -12,6 +12,7 @@ extends Control
 @onready var _address_edit: LineEdit = %AddressEdit
 @onready var _host_button: Button = %HostButton
 @onready var _join_button: Button = %JoinButton
+@onready var _bots_check: CheckBox = %BotsCheck
 @onready var _start_button: Button = %StartButton
 @onready var _players_label: Label = %PlayersLabel
 @onready var _status_label: Label = %StatusLabel
@@ -25,6 +26,11 @@ func _ready() -> void:
 	_invite_button.pressed.connect(SteamService.invite_friends)
 	_copy_code_button.pressed.connect(func() -> void: DisplayServer.clipboard_set(str(SteamService.lobby_id)))
 	_start_button.pressed.connect(Network.start_game)
+	_bots_check.button_pressed = Network.fill_with_bots and not CmdArgs.has_flag("--no-bots")
+	Network.fill_with_bots = _bots_check.button_pressed
+	_bots_check.toggled.connect(func(on: bool) -> void:
+		Network.fill_with_bots = on
+		_refresh())
 	Network.roster_changed.connect(_on_roster_changed)
 	Network.connection_failed.connect(_on_connection_failed)
 	_steam_status_label.text = SteamService.status_message
@@ -97,7 +103,8 @@ func _refresh() -> void:
 	if hosting_steam:
 		_lobby_code_edit.text = str(SteamService.lobby_id)
 	_start_button.visible = Network.is_host()
-	_start_button.disabled = Network.roster.size() < Session.RULES.spike_min_players
+	_start_button.disabled = not Network.can_start()
+	_bots_check.visible = Network.is_host()
 	if not at_table:
 		_players_label.text = "Henüz bir masada değilsin."
 		return
@@ -111,6 +118,10 @@ func _refresh() -> void:
 		if peer_id == me:
 			tags += " (sen)"
 		lines.append("Koltuk %d: %s%s" % [info["seat"] + 1, info["name"], tags])
+	if Network.is_host() and Network.bot_count() > 0:
+		lines.append("+ %d bot" % Network.bot_count())
+	elif Network.is_host() and not Network.can_start():
+		lines.append("En az %d oyuncu gerekiyor (botlar sayılır)." % Session.RULES.min_players)
 	_players_label.text = "\n".join(lines)
 	get_window().title = "Üç Maymun — %s" % Network.roster[me]["name"] if Network.roster.has(me) else "Üç Maymun"
 

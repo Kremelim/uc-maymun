@@ -32,15 +32,34 @@ material = SubResource("Mat_floor")
 size = Vector2(12, 12)
 
 [sub_resource type="StyleBoxFlat" id="Style_hud"]
-content_margin_left = 12.0
-content_margin_top = 10.0
-content_margin_right = 12.0
-content_margin_bottom = 10.0
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
 bg_color = Color(0.07, 0.06, 0.05, 0.92)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="Style_reckoning"]
+content_margin_left = 16.0
+content_margin_top = 12.0
+content_margin_right = 16.0
+content_margin_bottom = 12.0
+bg_color = Color(0.09, 0.07, 0.05, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.85, 0.65, 0.25, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="Theme" id="Theme_hud"]
+default_font_size = 14
 
 [node name="Table" type="Node3D"]
 script = ExtResource("1_table")
@@ -75,56 +94,70 @@ fov = 65.0
 
 [node name="Hud" type="CanvasLayer" parent="."]
 
-[node name="Panel" type="PanelContainer" parent="Hud"]
+[node name="TopBar" type="PanelContainer" parent="Hud"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = 38.0
+grow_horizontal = 2
+theme = SubResource("Theme_hud")
+theme_override_styles/panel = SubResource("Style_hud")
+
+[node name="Row" type="HBoxContainer" parent="Hud/TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="PhaseLabel" type="Label" parent="Hud/TopBar/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Masa hazırlanıyor…"
+
+[node name="DebtLabel" type="Label" parent="Hud/TopBar/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="TimerLabel" type="Label" parent="Hud/TopBar/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.35, 1)
+
+[node name="MePanel" type="PanelContainer" parent="Hud"]
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 12.0
-offset_top = -12.0
-offset_right = 392.0
-offset_bottom = -12.0
+offset_left = 8.0
+offset_top = -8.0
+offset_right = 268.0
+offset_bottom = -8.0
 grow_vertical = 0
+theme = SubResource("Theme_hud")
 theme_override_styles/panel = SubResource("Style_hud")
 
-[node name="VBox" type="VBoxContainer" parent="Hud/Panel"]
+[node name="VBox" type="VBoxContainer" parent="Hud/MePanel"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
-[node name="IncomeLabel" type="Label" parent="Hud/Panel/VBox"]
+[node name="MeLabel" type="Label" parent="Hud/MePanel/VBox"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 0)
 layout_mode = 2
+autowrap_mode = 3
 text = "Gelir bekleniyor…"
 
-[node name="TableLabel" type="Label" parent="Hud/Panel/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Masa hazırlanıyor…"
-
-[node name="DeclareRow" type="HBoxContainer" parent="Hud/Panel/VBox"]
-layout_mode = 2
-
-[node name="DeclareSpin" type="SpinBox" parent="Hud/Panel/VBox/DeclareRow"]
-unique_name_in_owner = true
-layout_mode = 2
-max_value = 20.0
-rounded = true
-
-[node name="DeclareButton" type="Button" parent="Hud/Panel/VBox/DeclareRow"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Beyan et"
-
-[node name="VoiceRow" type="HBoxContainer" parent="Hud/Panel/VBox"]
+[node name="VoiceRow" type="HBoxContainer" parent="Hud/MePanel/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="MicToggle" type="CheckButton" parent="Hud/Panel/VBox/VoiceRow"]
+[node name="MicToggle" type="CheckButton" parent="Hud/MePanel/VBox/VoiceRow"]
 unique_name_in_owner = true
 layout_mode = 2
 button_pressed = true
 text = "Mikrofon"
 
-[node name="MicMeter" type="ProgressBar" parent="Hud/Panel/VBox/VoiceRow"]
+[node name="MicMeter" type="ProgressBar" parent="Hud/MePanel/VBox/VoiceRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
@@ -133,25 +166,225 @@ size_flags_vertical = 4
 max_value = 1.0
 show_percentage = false
 
-[node name="IncomingVoiceLabel" type="Label" parent="Hud/Panel/VBox"]
+[node name="IncomingVoiceLabel" type="Label" parent="Hud/MePanel/VBox"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 3
 text = "Gelen ses: —"
 
-[node name="LoopbackToggle" type="CheckButton" parent="Hud/Panel/VBox"]
+[node name="LoopbackToggle" type="CheckButton" parent="Hud/MePanel/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_font_sizes/font_size = 12
 text = "Kendi sesimi duy (mikrofon testi)"
 
-[node name="NewRoundButton" type="Button" parent="Hud/Panel/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Yeni tur dağıt (host)"
-
-[node name="LeaveButton" type="Button" parent="Hud/Panel/VBox"]
+[node name="LeaveButton" type="Button" parent="Hud/MePanel/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Masadan kalk"
+
+[node name="ActionPanel" type="PanelContainer" parent="Hud"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -8.0
+offset_right = 200.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 0
+theme = SubResource("Theme_hud")
+theme_override_styles/panel = SubResource("Style_hud")
+
+[node name="VBox" type="VBoxContainer" parent="Hud/ActionPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ActionLabel" type="Label" parent="Hud/ActionPanel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 2
+autowrap_mode = 3
+text = "Masa hazırlanıyor…"
+
+[node name="DeclareRow" type="HBoxContainer" parent="Hud/ActionPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="DeclareSpin" type="SpinBox" parent="Hud/ActionPanel/VBox/DeclareRow"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 20.0
+rounded = true
+
+[node name="DeclareButton" type="Button" parent="Hud/ActionPanel/VBox/DeclareRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Beyan et"
+
+[node name="VouchRow" type="HBoxContainer" parent="Hud/ActionPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="VouchTitle" type="Label" parent="Hud/ActionPanel/VBox/VouchRow"]
+layout_mode = 2
+text = "Kefil ol:"
+
+[node name="VouchOption" type="OptionButton" parent="Hud/ActionPanel/VBox/VouchRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ContributeRow" type="HBoxContainer" parent="Hud/ActionPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ExtraSpin" type="SpinBox" parent="Hud/ActionPanel/VBox/ContributeRow"]
+unique_name_in_owner = true
+layout_mode = 2
+rounded = true
+
+[node name="ContributeButton" type="Button" parent="Hud/ActionPanel/VBox/ContributeRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Avucunu kapat"
+
+[node name="TargetButtons" type="HBoxContainer" parent="Hud/ActionPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="DecideRow" type="HBoxContainer" parent="Hud/ActionPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ReportButton" type="Button" parent="Hud/ActionPanel/VBox/DecideRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Raporluyorum"
+
+[node name="CleanButton" type="Button" parent="Hud/ActionPanel/VBox/DecideRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Temiz"
+
+[node name="ShopGrid" type="GridContainer" parent="Hud/ActionPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+columns = 3
+
+[node name="TransferRow" type="HBoxContainer" parent="Hud/ActionPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="TransferTitle" type="Label" parent="Hud/ActionPanel/VBox/TransferRow"]
+layout_mode = 2
+text = "Masa altı:"
+
+[node name="TransferTo" type="OptionButton" parent="Hud/ActionPanel/VBox/TransferRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TransferSpin" type="SpinBox" parent="Hud/ActionPanel/VBox/TransferRow"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 1.0
+value = 1.0
+rounded = true
+
+[node name="TransferButton" type="Button" parent="Hud/ActionPanel/VBox/TransferRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Ver"
+
+[node name="ReadyButton" type="Button" parent="Hud/ActionPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Hazırım"
+
+[node name="LogPanel" type="PanelContainer" parent="Hud"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -268.0
+offset_top = -228.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 0
+grow_vertical = 0
+theme = SubResource("Theme_hud")
+theme_override_styles/panel = SubResource("Style_hud")
+
+[node name="LogText" type="RichTextLabel" parent="Hud/LogPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 13
+bbcode_enabled = true
+scroll_following = true
+
+[node name="ReckoningPanel" type="PanelContainer" parent="Hud"]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -200.0
+offset_right = 300.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_hud")
+theme_override_styles/panel = SubResource("Style_reckoning")
+
+[node name="VBox" type="VBoxContainer" parent="Hud/ReckoningPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ReckoningTitle" type="Label" parent="Hud/ReckoningPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Hesap Günü"
+horizontal_alignment = 1
+
+[node name="ReckoningGrid" type="GridContainer" parent="Hud/ReckoningPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 18
+theme_override_constants/v_separation = 4
+
+[node name="ReckoningNotes" type="Label" parent="Hud/ReckoningPanel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(560, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+autowrap_mode = 3
+
+[node name="ReckoningButtons" type="HBoxContainer" parent="Hud/ReckoningPanel/VBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="NextButton" type="Button" parent="Hud/ReckoningPanel/VBox/ReckoningButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Sonraki maça hazırım"
+
+[node name="LobbyButton" type="Button" parent="Hud/ReckoningPanel/VBox/ReckoningButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Lobiye dön"
 
 [node name="SelfVoice" type="AudioStreamPlayer" parent="."]

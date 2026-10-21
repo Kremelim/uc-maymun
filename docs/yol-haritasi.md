@@ -1,6 +1,6 @@
 # Yol haritası
 
-> Son güncelleme: 2026-10-20
+> Son güncelleme: 2026-10-21
 >
 > Sabit tarih yok; **kilometre taşlarıyla** ilerliyoruz. Her taşın bir "bitti" kriteri var. Her taş bitince
 > ekip olarak üç seçenekten birine karar verilir: **devam / değiştir / bırak.**
@@ -19,6 +19,12 @@
 | **M6** | Çıkış | Erken Erişim veya tam sürüm. Lansman sonrası içerik güncellemesi planı hazır. | Tüm ekip |
 
 M0 ve M1 birbirinden bağımsız, aynı anda yürür.
+
+**Şu an (2026-10-21):**
+- M1'de kalan tek iş gerçek mikrofonla ses testi.
+- M2'nin ilk sürümü hazır: kuralların tamamı online ve botlarla oynanıyor ([m2-gri-kutu.md](m2-gri-kutu.md)).
+- M2'nin "bitti" kriteri için ekibin düzenli olarak oynaması gerekiyor.
+- Online gri kutu, kağıt prototipin yerine de kullanılabilir: ayrı evlerden oynanabiliyor.
 
 ## Çalışma ritmi
 

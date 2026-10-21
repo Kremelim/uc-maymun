@@ -94,7 +94,7 @@ func start_round() -> void:
 	assert(phase == Phase.ROUND_OVER and round_index < rules.round_count - 1, "no round to start")
 	round_index += 1
 	var income_set: PackedInt32Array = rules.income_sets[_rng.randi_range(0, rules.income_sets.size() - 1)]
-	incomes = TableState._shuffled(income_set, _rng).slice(0, seat_count)
+	incomes = _shuffled(income_set, _rng).slice(0, seat_count)
 	for seat in seat_count:
 		cash[seat] += incomes[seat]
 	declarations = _filled(NONE)
@@ -124,11 +124,16 @@ func declare(seat: int, amount: int) -> bool:
 	return true
 
 
-## One vouch per player per round (a new one replaces it); never for yourself.
-## The auditor cannot vouch: they would earn the vouch reward by calling their own
-## target clean. Vouching for the auditor is meaningless, since nobody audits them.
+## One vouch per player per round (a new one replaces it, NONE takes it back); never for
+## yourself. The auditor cannot vouch: they would earn the vouch reward by calling their
+## own target clean. Vouching for the auditor is meaningless, since nobody audits them.
 func vouch(seat: int, target: int) -> bool:
-	if phase != Phase.NEGOTIATE or not _is_seat(seat) or not _is_seat(target) or seat == target:
+	if phase != Phase.NEGOTIATE or not _is_seat(seat):
+		return false
+	if target == NONE:
+		vouches[seat] = NONE
+		return true
+	if not _is_seat(target) or seat == target:
 		return false
 	if seat == auditor() or target == auditor():
 		return false
@@ -179,6 +184,15 @@ func choose_audit_target(target: int) -> bool:
 	audit_target = target
 	phase = Phase.AUDIT_DECIDE
 	return true
+
+
+func has_contributed(seat: int) -> bool:
+	return _extras[seat] != NONE
+
+
+## This round's audit as everyone saw it: {"target", "caught", "difference"}, or empty.
+func audit_outcome() -> Dictionary:
+	return _audit.duplicate()
 
 
 ## What only the auditor sees: the audited player's real income this round.
@@ -349,9 +363,15 @@ func vouchers_of(target: int) -> Array:
 
 
 ## Everything `seat` may know right now: the public table plus its own secrets.
+## The auditor also sees the card it is looking at, and Hesap Günü opens everything.
 func view_for(seat: int) -> Dictionary:
 	var declarations_open := phase > Phase.DECLARE
 	var contributions_open := phase > Phase.CONTRIBUTE
+	var declared: Array = []
+	var contributed: Array = []
+	for s in seat_count:
+		declared.append(declarations[s] != NONE)
+		contributed.append(has_contributed(s))
 	var my_transfers: Array = []
 	for t: Dictionary in _transfers:
 		if t["from"] == seat or t["to"] == seat:
@@ -359,7 +379,7 @@ func view_for(seat: int) -> Dictionary:
 	var past_incomes := PackedInt32Array()
 	for secret: Dictionary in _secrets:
 		past_incomes.append((secret["incomes"] as PackedInt32Array)[seat])
-	return {
+	var view := {
 		"seat": seat,
 		"seat_count": seat_count,
 		"round": round_index,
@@ -374,17 +394,30 @@ func view_for(seat: int) -> Dictionary:
 		"vouches": vouches.duplicate(),
 		"minimums": minimums.duplicate(),
 		"contributions": contributions.duplicate() if contributions_open else PackedInt32Array(),
+		"audit_target": audit_target,
 		"audit": _audit.duplicate(),
 		"accessories": accessories.duplicate(true),
 		"total_contributed": total_contributed.duplicate(),
 		"history": history.duplicate(true),
 		"ious": ious.duplicate(true),
+		"pot": pot,
+		"declared": declared,
+		"contributed": contributed,
 		"my_income": incomes[seat],
 		"my_declaration": declarations[seat],
+		"my_extra": _extras[seat],
 		"my_cash": cash[seat],
 		"my_past_incomes": past_incomes,
 		"my_transfers": my_transfers,
 	}
+	if phase == Phase.AUDIT_DECIDE and seat == auditor():
+		view["audit_peek"] = incomes[audit_target]
+	if is_over():
+		var final_wealth := PackedInt32Array()
+		for s in seat_count:
+			final_wealth.append(wealth(s))
+		view["reckoning"] = {"rounds": reveal(), "wealth": final_wealth, "points": points(), "succeeded": succeeded()}
+	return view
 
 
 ## Hesap Günü: every round's real incomes, cover-ups and transfers. Only once the match is over.
@@ -454,6 +487,17 @@ func _filled(value: int) -> PackedInt32Array:
 	array.resize(seat_count)
 	array.fill(value)
 	return array
+
+
+## Fisher-Yates with our own RNG: Array.shuffle() uses the global RNG and would break determinism.
+static func _shuffled(values: PackedInt32Array, rng: RandomNumberGenerator) -> PackedInt32Array:
+	var result := values.duplicate()
+	for i in range(result.size() - 1, 0, -1):
+		var j := rng.randi_range(0, i)
+		var swap := result[i]
+		result[i] = result[j]
+		result[j] = swap
+	return result
 
 
 static func _sum(values: PackedInt32Array) -> int:

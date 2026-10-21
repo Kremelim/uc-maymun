@@ -27,7 +27,7 @@ theme_override_constants/separation = 10
 [node name="Title" type="Label" parent="Center/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "Üç Maymun — teknik deneme"
+text = "Üç Maymun — gri kutu"
 horizontal_alignment = 1
 
 [node name="NameEdit" type="LineEdit" parent="Center/VBox"]
@@ -112,6 +112,13 @@ text = "Masaya katıl (yerel)"
 unique_name_in_owner = true
 layout_mode = 2
 text = "Henüz bir masada değilsin."
+
+[node name="BotsCheck" type="CheckBox" parent="Center/VBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+button_pressed = true
+text = "Boş koltuklara bot oturt"
 
 [node name="StartButton" type="Button" parent="Center/VBox"]
 unique_name_in_owner = true
