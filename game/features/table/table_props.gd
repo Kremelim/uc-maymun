@@ -2,7 +2,8 @@ class_name TableProps
 extends Node3D
 ## What lies on the table: the pot as a pile of coins with how much this round needs,
 ## in front of every seat its declaration card (face down until everyone has declared)
-## and the accessories it bought, as small stand-ins until M3 puts them on the monkeys.
+## and, for the seats whose monkey does not wear them (our own: we do not see our
+## monkey), the accessories bought, as small stand-ins.
 ## Presentation only: it draws what the view says.
 
 const TABLE_TOP := 0.79
@@ -30,7 +31,8 @@ var _items: Dictionary = {}  # seat -> {"root": Node3D, "shown": Array}
 
 
 ## `my_seat` is where the camera sits: the pot's label goes on that side of the pile.
-func setup(seat_count: int, my_seat: int) -> void:
+## `item_seats` are the seats whose accessories lie on the table.
+func setup(seat_count: int, my_seat: int, item_seats: Array[int] = []) -> void:
 	for child in get_children():
 		child.queue_free()
 	_cards.clear()
@@ -71,6 +73,8 @@ func setup(seat_count: int, my_seat: int) -> void:
 		label.position = mesh.position + Vector3.UP * 0.07
 		add_child(label)
 		_cards[seat] = {"mesh": mesh, "label": label}
+		if seat not in item_seats:
+			continue
 		var items := Node3D.new()
 		items.position = direction * ITEM_DISTANCE + Vector3.UP * TABLE_TOP
 		items.rotation.y = angle

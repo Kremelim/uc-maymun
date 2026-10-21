@@ -10,6 +10,7 @@ extends SceneTree
 ## HOWTO=1 opens the "Nasıl oynanır" overlay on top.
 ## Add MOUTH_OPEN=1 (or a fraction, e.g. 0.5 for normal speech) to show the monkeys
 ## talking, and "-- --fake-voice" at the end to show the HUD's voice controls.
+## ITEMS=1 gives every seat some accessories (bots rarely buy), to see them worn.
 
 const NAMES := ["Kerem", "Gonc", "Abdulalim", "Ulas"]
 const KINDS := ["açgözlü", "dürüst", "kinci", "açgözlü"]
@@ -42,6 +43,10 @@ func _run() -> void:
 	network.roster = roster
 	session.seat_names = PackedStringArray(NAMES)
 	session.view = _play_to(state, seat, int(OS.get_environment("MATCH")))
+	if OS.get_environment("ITEMS") == "1":
+		var items: Array = session.view["accessories"]
+		for s in items.size():
+			items[s] = [[0, 3], [1, 2], [4], [0, 1, 2, 3, 4]][s % 4]
 	change_scene_to_file("res://features/table/table.tscn")
 	if OS.get_environment("HOWTO") == "1":
 		await process_frame
@@ -50,8 +55,8 @@ func _run() -> void:
 	var mouth_open := OS.get_environment("MOUTH_OPEN").to_float()
 	for i in FRAMES_TO_SETTLE:
 		if mouth_open > 0.0:
-			for monkey in root.find_children("*", "MonkeyPlaceholder", true, false):
-				(monkey as MonkeyPlaceholder).set_mouth_open(mouth_open)
+			for monkey in root.find_children("*", "Monkey", true, false):
+				(monkey as Monkey).set_mouth_open(mouth_open)
 		await process_frame
 	root.get_texture().get_image().save_png(OS.get_environment("OUT"))
 	quit()

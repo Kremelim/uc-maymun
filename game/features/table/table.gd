@@ -2,15 +2,21 @@ extends Node3D
 ## Table scene: presentation only. Reads Session's cached view of our seat and sends
 ## intents back; every rule lives in core/ and runs on the host.
 
-const MONKEY_SCENE: PackedScene = preload("res://features/table/monkey_placeholder.tscn")
+const MONKEY_SCENE: PackedScene = preload("res://features/monkey/monkey.tscn")
+## Which model sits in which seat; edit this resource to bring in new monkeys.
+const CAST: MonkeyCast = preload("res://assets/monkeys/cast.tres")
 const SEAT_RADIUS := 1.6
+## The monkeys sit a little closer than the seat circle, so their forearms reach the table.
+const MONKEY_RADIUS := 1.38
+const STOOL_HEIGHT := 0.44
+const STOOL_COLOR := Color(0.22, 0.12, 0.06)
 const EYE_HEIGHT := 1.85
 ## The camera sits behind and above the seat, looking down at the table, so the pot,
 ## the cards and the neighbours all fit above the HUD.
 const CAMERA_BACK := 1.0
 const LOOK_TARGET := Vector3(0, 0.55, 0)
 ## The meter uses the same scaling as the mouths, so "full" means a wide-open mouth.
-const MIC_METER_GAIN := MonkeyPlaceholder.MOUTH_GAIN
+const MIC_METER_GAIN := Monkey.MOUTH_GAIN
 const NONE := MatchState.NONE
 const PHASE_NAMES := {
 	MatchState.Phase.DECLARE: "Beyan",
@@ -38,7 +44,7 @@ const HELP_PAGES := {
 }
 enum MenuItem { RULES, LOG, MIC, VOICE_DETAILS, LOOPBACK, LEAVE }
 
-var _monkeys: Dictionary = {}  # seat -> MonkeyPlaceholder
+var _monkeys: Dictionary = {}  # seat -> Monkey
 var _self_voice_playback: AudioStreamGeneratorPlayback
 var _view: Dictionary = {}
 ## Seats behind the entries of the vouch / transfer menus, rebuilt with each view.
@@ -146,13 +152,35 @@ func _build_seats() -> void:
 			_camera.position = floor_position * (1.0 + CAMERA_BACK / SEAT_RADIUS) + Vector3.UP * EYE_HEIGHT
 			_camera.look_at(LOOK_TARGET)
 			continue
-		var monkey := MONKEY_SCENE.instantiate() as MonkeyPlaceholder
+		var monkey := MONKEY_SCENE.instantiate() as Monkey
 		_seats_root.add_child(monkey)
-		monkey.position = floor_position
+		monkey.position = floor_position * (MONKEY_RADIUS / SEAT_RADIUS)
 		monkey.look_at(Vector3.ZERO)
+		monkey.dress(CAST.body_for(seat), CAST.tint_for(seat), CAST.toon)
 		monkey.set_player_name(Session.seat_names[seat])
 		_monkeys[seat] = monkey
-	_props.setup(seat_count, my_seat)
+		monkey.add_child(_stool())
+	# Accessories lie on the table for our own seat (we do not see our monkey) and for
+	# monkeys whose body cannot wear them.
+	var item_seats: Array[int] = []
+	for seat in seat_count:
+		if not _monkeys.has(seat) or not (_monkeys[seat] as Monkey).can_wear_all(Session.RULES.accessory_keys):
+			item_seats.append(seat)
+	_props.setup(seat_count, my_seat, item_seats)
+
+
+func _stool() -> MeshInstance3D:
+	var stool := MeshInstance3D.new()
+	var shape := CylinderMesh.new()
+	shape.top_radius = 0.2
+	shape.bottom_radius = 0.16
+	shape.height = STOOL_HEIGHT
+	var material := StandardMaterial3D.new()
+	material.albedo_color = STOOL_COLOR
+	shape.material = material
+	stool.mesh = shape
+	stool.position.y = STOOL_HEIGHT / 2.0
+	return stool
 
 
 func _build_shop() -> void:
@@ -210,7 +238,7 @@ func _setup_voice() -> void:
 		_monkeys[seat].setup_voice(VoiceChat.sample_rate())
 	var generator := AudioStreamGenerator.new()
 	generator.mix_rate = VoiceChat.sample_rate()
-	generator.buffer_length = MonkeyPlaceholder.VOICE_BUFFER_SECONDS
+	generator.buffer_length = Monkey.VOICE_BUFFER_SECONDS
 	_self_voice.stream = generator
 	_self_voice.play()
 	_self_voice_playback = _self_voice.get_stream_playback()
@@ -244,7 +272,7 @@ func _on_voice_received(peer_id: int, frames: PackedVector2Array, level: float) 
 		if _self_voice_playback.get_frames_available() >= frames.size():
 			_self_voice_playback.push_buffer(frames)
 		return
-	var monkey: MonkeyPlaceholder = _monkeys.get(Network.seat_of(peer_id))
+	var monkey: Monkey = _monkeys.get(Network.seat_of(peer_id))
 	if monkey != null:
 		monkey.push_voice(frames, level)
 
@@ -301,15 +329,19 @@ func _update_me() -> void:
 
 
 ## Above each monkey: its name and one short word. Numbers live on the table (cards,
-## coins) and in Hesap Günü, not over their heads.
+## coins) and in Hesap Günü, not over their heads. Accessories are on the monkeys.
 func _update_monkeys() -> void:
 	var v := _view
 	var phase: int = v["phase"]
 	var awaiting: Array = v["awaiting"]
 	for seat: int in _monkeys:
-		var monkey: MonkeyPlaceholder = _monkeys[seat]
+		var monkey: Monkey = _monkeys[seat]
 		monkey.set_player_name(Session.seat_names[seat])
 		monkey.set_auditor(seat == v["auditor"] and not v["night_over"])
+		var keys := PackedStringArray()
+		for item: int in v["accessories"][seat]:
+			keys.append(Session.RULES.accessory_keys[item])
+		monkey.set_accessories(keys)
 		var status := ""
 		if phase != MatchState.Phase.MATCH_OVER and not v["night_over"]:
 			status = "…" if seat in awaiting else "✓"
@@ -485,21 +517,39 @@ func _announce_events(first: bool) -> void:
 	var events: Array = _view["events"]
 	if events.is_empty():
 		return
-	if _view.has("reckoning"):
+	var reckoning := _view.has("reckoning")
+	if reckoning:
 		# Hesap Günü's table says it all, and the banner would cover its title.
-		_last_event_id = events[-1]["id"]
 		_banner.clear()
 		_banner.hide()
-		return
 	if first:
 		_last_event_id = events[-1]["id"]
 		var v := _view
-		_banner.announce("Maç %d · Tur %d" % [v["match_index"] + 1, v["round"] + 1], "Denetçi: %s" % _name(v["auditor"]))
+		if not reckoning:
+			_banner.announce("Maç %d · Tur %d" % [v["match_index"] + 1, v["round"] + 1], "Denetçi: %s" % _name(v["auditor"]))
 		return
 	for event: Dictionary in events:
 		if event["id"] > _last_event_id:
 			_last_event_id = event["id"]
-			_announce(event)
+			_react(event)
+			if not reckoning:
+				_announce(event)
+
+
+## The monkeys show the big moments with their bodies too.
+func _react(e: Dictionary) -> void:
+	match str(e["type"]):
+		"audit_result":
+			var target: Monkey = _monkeys.get(int(e["target"]))
+			if target != null:
+				target.react("caught" if e["caught"] else "cheer")
+		"installment":
+			if e["pot"] < e["due"]:
+				for seat: int in _monkeys:
+					(_monkeys[seat] as Monkey).react("slump")
+		"match_over":
+			for seat: int in _monkeys:
+				(_monkeys[seat] as Monkey).react("cheer" if e["succeeded"] else "slump")
 
 
 func _announce(e: Dictionary) -> void:

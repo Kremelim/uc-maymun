@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="MonkeyCast" format=3]
+
+[ext_resource type="Script" path="res://features/monkey/monkey_cast.gd" id="1_cast"]
+[ext_resource type="PackedScene" uid="uid://dqdf3iveb6al8" path="res://assets/monkeys/test_monkey.glb" id="2_test"]
+
+[resource]
+script = ExtResource("1_cast")
+bodies = Array[PackedScene]([ExtResource("2_test")])
+fur_tints = Array[Color]([Color(1, 1, 1, 1), Color(1.6, 1.15, 0.7, 1), Color(0.95, 1.35, 2.1, 1), Color(0.5, 0.5, 0.55, 1)])
+toon = true

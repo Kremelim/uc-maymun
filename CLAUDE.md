@@ -31,6 +31,9 @@
   masada jeton ve beyan kartları, temel kurallarla ilk maç. Görünüş (karakter, ortam) M3'te. Ekip testi bekliyor.
 - M3 planı (taslak, kararlar ekipte): `docs/m3-plan.md`. Önerilen yön: stilize karikatür, gazino arka odası, orta bütçe, karakter siparişi.
   Ücretli varlıklar repoya girerse repo özel kalmalı (lisanslar dağıtımı yasaklıyor).
+- M3a teknik hazırlık bitti (ADR-0003 önerildi): tek `Monkey` sınıfı (`features/monkey/`), hangi koltukta hangi model
+  `assets/monkeys/cast.tres`'te. Modelin kuralları `docs/sanatci-sartnamesi.md` (sanatçıya İngilizcesi `docs/artist-spec.en.md`).
+  Gerçek modeller gelene kadar masada Blender betiğiyle üretilen ücretsiz test maymunu (`tools/blender/make_test_monkey.py`).
 - Kurallar v0.3 (2026-10-21, Kerem Ataç kabul etti): v0.2 (denetçinin kartı açık, asgari katkı beyanın %60'ı ve beyanlar açılınca ödenir,
   son tur dükkanı kapalı, fazla beyan da yalan, en az 3 oyuncu) + ödenemeyen ceza senet olur + gece 4 maç, ilk denetçi her maç kayar.
   Açık sorular ve Kerem Gönç'ün kararını bekleyenler: `docs/sim/bulgular-v0.3.md`. Kağıt prototip henüz oynanmadı.
@@ -61,6 +64,12 @@
   - Görsel kontrol (botlar bir geceyi istenen aşamaya kadar oynar, masa Xvfb altında çizilip PNG kaydedilir): kullanımı
     `game/tests/visual/render_table.gd` başında. Arayüz değiştiğinde birkaç aşamayı (`STATE=`, tam kurallar için `MATCH=1`,
     kurallar ekranı için `HOWTO=1`) çizip görüntülere bak.
+  - Maymun modeli kontrolü (şartnameye uyuyor mu; `--model=` olmadan cast'teki bütün modeller):
+    `godot --headless --path game --script res://tools/check_monkey_model.gd -- --model=res://assets/monkeys/x.glb`.
+    Tek maymunun yakın plan görüntüsü: `game/tests/visual/render_monkey.gd` (kullanımı başında).
+  - Test maymununu yeniden üretmek (Blender 4.5 LTS, ekransız; bulut oturumunda kurulu değil, indirilir):
+    `blender -b --factory-startup --python tools/blender/make_test_monkey.py -- --out game/assets/monkeys/test_monkey.glb`.
+    Çıktı her seferinde bayt bayt aynı değil; sadece betik değişince üret.
 - CI (`.github/workflows/ci.yml`) her PR'da import, uyarı kontrolü, unit, kısa bir simülatör çalıştırması ve E2E çalıştırır.
 - Sahne düğümü uyarıları (ör. autowrap'li Label'a minimum genişlik) bu kontrole girmez; .tscn yazarken dikkat.
 
