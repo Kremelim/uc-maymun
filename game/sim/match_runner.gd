@@ -8,8 +8,8 @@ extends RefCounted
 const CLOSE_MARGIN := 2
 
 
-static func play(rules: RulesConfig, bots: Array[SimBot], match_seed: int, first_auditor: int = 0) -> Dictionary:
-	var state := MatchState.new(rules, bots.size(), match_seed, first_auditor)
+static func play(rules: RulesConfig, bots: Array[SimBot], match_seed: int, first_auditor: int = 0, basic: bool = false) -> Dictionary:
+	var state := MatchState.new(rules, bots.size(), match_seed, first_auditor, basic)
 	for i in bots.size():
 		bots[i].prepare(rules, match_seed, i)
 	var lies := _zeros(bots.size())
@@ -52,8 +52,8 @@ static func play(rules: RulesConfig, bots: Array[SimBot], match_seed: int, first
 			var fine := state.fine_for(lie)
 			var price := bots[auditor].cover_up_price(fine, rules.audit_compensation)
 			var loss := maxi(lie, 0) + fine - _voucher_share(state, target, fine)
-			if price > 0 and bots[target].accepts_cover_up(price, loss, rules.audit_compensation, state.cash[target]):
-				state.transfer(target, auditor, price)
+			if price > 0 and bots[target].accepts_cover_up(price, loss, rules.audit_compensation, state.cash[target]) \
+					and state.transfer(target, auditor, price):
 				bribes_paid[target] += price
 				report = false
 		state.resolve_audit(report)

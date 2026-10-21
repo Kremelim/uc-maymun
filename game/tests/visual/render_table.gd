@@ -6,6 +6,8 @@ extends SceneTree
 ##     --rendering-method gl_compatibility --rendering-driver opengl3 \
 ##     --resolution 960x540 --script res://tests/visual/render_table.gd
 ## STATE: declare, negotiate, contribute, audit_choose, audit_decide, shop, match_over, night_over.
+## MATCH=1 shows the second match (full rules); the first one uses the basic rules, without a shop.
+## HOWTO=1 opens the "Nasıl oynanır" overlay on top.
 ## Add MOUTH_OPEN=1 (or a fraction, e.g. 0.5 for normal speech) to show the monkeys
 ## talking, and "-- --fake-voice" at the end to show the HUD's voice controls.
 
@@ -39,8 +41,12 @@ func _run() -> void:
 		roster[1 if s == seat else 100 + s] = {"name": NAMES[s], "seat": s}
 	network.roster = roster
 	session.seat_names = PackedStringArray(NAMES)
-	session.view = _play_to(state, seat)
+	session.view = _play_to(state, seat, int(OS.get_environment("MATCH")))
 	change_scene_to_file("res://features/table/table.tscn")
+	if OS.get_environment("HOWTO") == "1":
+		await process_frame
+		await process_frame
+		(current_scene.find_child("HowToPlay", true, false) as Control).show()
 	var mouth_open := OS.get_environment("MOUTH_OPEN").to_float()
 	for i in FRAMES_TO_SETTLE:
 		if mouth_open > 0.0:
@@ -52,8 +58,8 @@ func _run() -> void:
 
 
 ## Bots play from the start of the night until the view of `seat` shows `state`.
-## Round 2 of the first match, so the log and the table have some history.
-func _play_to(state: String, seat: int) -> Dictionary:
+## Round 2 of match `match_index`, so the log and the table have some history.
+func _play_to(state: String, seat: int, match_index: int) -> Dictionary:
 	var rules: RulesConfig = load("res://data/rules_v0_3.tres")
 	var night := Night.new(rules, NAMES.size(), NIGHT_SEED)
 	var bots: Array[SeatBot] = []
@@ -63,6 +69,8 @@ func _play_to(state: String, seat: int) -> Dictionary:
 		if state == "night_over":
 			return night.night_over
 		var m := night.current_match
+		if night.match_index != match_index:
+			return false
 		if state == "match_over":
 			return m.is_over()
 		return m.round_index == 1 and m.phase == STATES.get(state, MatchState.Phase.DECLARE)

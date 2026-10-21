@@ -81,6 +81,7 @@ func test_v0_3_data_matches_design_doc() -> void:
 	assert_eq(RULES_V0_3.unpaid_becomes_iou, true, "unpaid fines become IOUs")
 	assert_eq(RULES_V0_3.rotate_first_auditor, true, "the first auditor moves on each match")
 	assert_eq(RULES_V0_3.matches_per_night, 4, "a night of 4: everyone audits first once")
+	assert_eq(RULES_V0_3.basic_matches, 1, "the first match teaches the basic rules")
 	for property: String in ["min_players", "max_players", "round_count", "income_sets", "installment",
 			"shortfall_interest", "fine_multiplier", "audit_compensation", "vouch_reward", "over_declaration_is_lie",
 			"auditor_card_open", "min_contribution_ratio", "accessory_names", "accessory_prices", "accessory_values",
@@ -232,6 +233,22 @@ func test_unpaid_fine_becomes_an_iou() -> void:
 	assert_eq(state.wealth(3), -2, "the IOU comes off the liar's wealth")
 	assert_eq(state.wealth(0), 5 - 3 + 3 + 2, "and goes onto the auditor's")
 	assert_eq(state.view_for(1)["ious"], state.ious, "IOUs are public")
+
+
+func test_basic_rules_have_no_vouching_transfers_or_shop() -> void:
+	var state := MatchState.new(RULES, 4, 7, 0, true)
+	state.start_round()
+	_set_incomes(state, [5, 5, 5, 5])
+	_declare_all(state, [5, 5, 5, 5])
+	assert_true(not state.vouch(1, 2), "no vouching")
+	assert_true(not state.transfer(1, 2, 1), "no coins under the table")
+	state.end_negotiation()
+	_contribute_all(state, [0, 0, 0, 0])
+	state.choose_audit_target(1)
+	state.resolve_audit(true)
+	assert_true(not state.shop_open(), "no shop")
+	assert_true(not state.can_buy(1, 0), "nothing to buy")
+	assert_eq(state.view_for(1)["basic"], true, "players know which rules they play")
 
 
 func test_fine_multiplier_rounds_up() -> void:

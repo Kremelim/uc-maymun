@@ -19,6 +19,8 @@ var rules: RulesConfig
 var seat_count: int
 ## Who audits the first round; the others follow in seat order.
 var first_auditor := 0
+## Basic rules, for a night's first match: no vouching, no coins under the table, no shop.
+var basic := false
 var phase := Phase.ROUND_OVER
 var round_index := -1
 ## Debt carried into the next installment. Negative means credit.
@@ -52,11 +54,12 @@ var _unpaid := 0  # payments nobody could make this round; they join the common 
 var _rng := RandomNumberGenerator.new()
 
 
-func _init(p_rules: RulesConfig, p_seat_count: int, match_seed: int, p_first_auditor: int = 0) -> void:
+func _init(p_rules: RulesConfig, p_seat_count: int, match_seed: int, p_first_auditor: int = 0, p_basic: bool = false) -> void:
 	assert(p_seat_count >= 2 and p_seat_count <= p_rules.max_players, "seat count out of range")
 	rules = p_rules
 	seat_count = p_seat_count
 	first_auditor = posmod(p_first_auditor, seat_count)
+	basic = p_basic
 	_rng.seed = match_seed
 	cash.resize(seat_count)
 	total_contributed.resize(seat_count)
@@ -128,7 +131,7 @@ func declare(seat: int, amount: int) -> bool:
 ## yourself. The auditor cannot vouch: they would earn the vouch reward by calling their
 ## own target clean. Vouching for the auditor is meaningless, since nobody audits them.
 func vouch(seat: int, target: int) -> bool:
-	if phase != Phase.NEGOTIATE or not _is_seat(seat):
+	if basic or phase != Phase.NEGOTIATE or not _is_seat(seat):
 		return false
 	if target == NONE:
 		vouches[seat] = NONE
@@ -143,7 +146,7 @@ func vouch(seat: int, target: int) -> bool:
 
 ## Under the table: secret, never binding, and possible while negotiating and around the audit.
 func transfer(from: int, to: int, amount: int) -> bool:
-	if phase not in [Phase.NEGOTIATE, Phase.AUDIT_CHOOSE, Phase.AUDIT_DECIDE]:
+	if basic or phase not in [Phase.NEGOTIATE, Phase.AUDIT_CHOOSE, Phase.AUDIT_DECIDE]:
 		return false
 	if not _is_seat(from) or not _is_seat(to) or from == to or amount <= 0 or amount > cash[from]:
 		return false
@@ -202,7 +205,11 @@ func audit_peek() -> int:
 
 
 func fine_for(lie: int) -> int:
-	return ceili(absi(lie) * rules.fine_multiplier)
+	return fine_with(rules, lie)
+
+
+static func fine_with(p_rules: RulesConfig, lie: int) -> int:
+	return ceili(absi(lie) * p_rules.fine_multiplier)
 
 
 ## How far `seat`'s declaration is from the truth in a way the rules call a lie:
@@ -243,10 +250,15 @@ func resolve_audit(report: bool) -> void:
 	phase = Phase.SHOP
 
 
+## Whether the shop opens after this round's audit.
+func shop_open() -> bool:
+	return not basic and (rules.last_round_shop or not is_last_round())
+
+
 func can_buy(seat: int, item: int) -> bool:
 	if phase != Phase.SHOP or not _is_seat(seat) or item < 0 or item >= rules.accessory_prices.size():
 		return false
-	if is_last_round() and not rules.last_round_shop:
+	if not shop_open():
 		return false
 	return rules.accessory_prices[item] <= cash[seat]
 
@@ -382,6 +394,8 @@ func view_for(seat: int) -> Dictionary:
 	var view := {
 		"seat": seat,
 		"seat_count": seat_count,
+		"basic": basic,
+		"shop_open": shop_open(),
 		"round": round_index,
 		"round_count": rules.round_count,
 		"auditor": auditor(),

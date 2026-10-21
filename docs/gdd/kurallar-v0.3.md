@@ -7,6 +7,7 @@
 > - **[KARAR]** işaretli yerlerde ekip seçim yapmalı.
 > - Bütün sayılar ilk tahmin; playtest'lerden sonra değişecek. Oyundaki karşılıkları `game/data/rules_v0_3.tres` dosyasında.
 > - Simülasyon: [bulgular v0.3](../sim/bulgular-v0.3.md). Önceki sürümler: [v0.2](kurallar-v0.2.md), [v0.1](kurallar-v0.1.md).
+> - 2026-10-21 eki: [İlk maç: temel kurallar](#ilk-maç-temel-kurallar). İlk online denemede oyun anlaşılmadı. Kerem Ataç kabul etti; Kerem Gönç'ün onayı bekleniyor.
 
 Amaç: Dijital oyuna tek satır kod yazmadan önce, çekirdek eğlenceyi gerçek bir masada, gerçek jetonlarla test etmek.
 
@@ -126,6 +127,31 @@ Herkes toplamın 20 olduğunu bilir, hangi setin çekildiğini bilmez. **[KARAR]
   [ÖNERİ] O da eşitse oyuncular daha iyi sırayı paylaşır (ikisi de o sıranın puanını alır).
 - **Borç kaldı:** Herkes kaybeder.
 - **Her durumda Hesap Günü yapılır.** Herkes zarfını açar; bütün gerçek gelirler, beyanlar, kefaletler ve örtbaslar okunur. Dijital oyunun en önemli klip anı burası olacak.
+
+## İlk maç: temel kurallar
+
+Gecenin ilk maçı sadeleştirilmiş kurallarla oynanır. Amaç, oyunu yeni öğrenenlerin önce çekirdeği görmesi:
+
+- gelir;
+- beyan (asgari katkı dahil);
+- konuşma;
+- katkı;
+- denetim (örtbas dahil).
+
+İlk maçta **olmayanlar:**
+- **Kefil** yok.
+- **Masa altı** yok: jeton verilemez, rüşvet de verilemez.
+- **Dükkan** yok: aksesuar alınmaz.
+
+Pazarlık aşaması kalır, ama sadece konuşmak için. İkinci maçtan itibaren kurallar tam.
+
+Senet ilk maçta da var: cezasını ödeyemeyen borçlu kalır. Oyuncunun yaptığı bir hamle değil, cezanın sonucu.
+
+- Oyunu bilen bir masa bunu lobide kapatabilir ("İlk maç temel kurallarla" işaretini kaldırarak).
+- Kağıtta: ilk maçta kefil kağıdı, aksesuar kartları ve masa altı kullanılmaz.
+- Oyundaki karşılığı: `basic_matches = 1`.
+
+**[ÖNERİ]** Bu bölüm denge için değil, öğrenmek için. İlk maç diğerlerinden farklı oynandığı için, istenirse gece puanına sayılmaması da düşünülebilir.
 
 ## Gece skoru [ÖNERİ]
 

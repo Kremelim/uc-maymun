@@ -7,9 +7,9 @@ extends Node
 signal view_changed(view: Dictionary)
 
 const RULES: RulesConfig = preload("res://data/rules_v0_3.tres")
-## Bots wait this long before acting, so people can follow what happens.
+## Bots act one at a time, each after this long, so people can follow what happens.
 ## --bot-delay=0 makes them instant (tests).
-const BOT_DELAY_SEC := 0.8
+const BOT_DELAY_SEC := 1.4
 ## Bots in empty seats get one of these at random. Bribes need talking, so no corrupt bots.
 const BOT_KINDS := ["dürüst", "açgözlü", "kinci", "bedavacı"]
 ## A bot that takes over from someone who left plays it straight.
@@ -30,7 +30,8 @@ var _bot_turn_pending := false
 
 ## Host only. `roster` holds the people (seats 0..n-1); `bot_kinds` fill the seats after them.
 ## A negative seed picks a random one; it is printed so a night can be replayed.
-func host_begin(roster: Dictionary, bot_kinds: Array, night_seed: int = -1) -> void:
+## Without `basic_first`, even the first match uses the full rules.
+func host_begin(roster: Dictionary, bot_kinds: Array, night_seed: int = -1, basic_first: bool = true) -> void:
 	reset()
 	if night_seed < 0:
 		var rng := RandomNumberGenerator.new()
@@ -47,7 +48,11 @@ func host_begin(roster: Dictionary, bot_kinds: Array, night_seed: int = -1) -> v
 		var seat := roster.size() + i
 		seat_names[seat] = "Bot %d" % (i + 1)
 		_add_bot(seat, bot_kinds[i], night_seed)
-	_night = Night.new(RULES, seat_count, night_seed, Time.get_ticks_msec())
+	var rules := RULES
+	if not basic_first:
+		rules = RULES.duplicate()
+		rules.basic_matches = 0
+	_night = Night.new(rules, seat_count, night_seed, Time.get_ticks_msec())
 	_changed()
 
 
@@ -142,7 +147,9 @@ func _schedule_bots() -> void:
 	if _night == null:
 		return  # the night ended while we waited
 	var acted := false
-	for seat: int in _bots:
+	for seat: int in _night.awaiting():
+		if acted or not _bots.has(seat):
+			continue
 		for intent in (_bots[seat] as SeatBot).intents(_night.view_for(seat)):
 			acted = _night.apply(seat, intent) or acted
 	if acted:

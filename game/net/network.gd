@@ -15,6 +15,8 @@ var roster: Dictionary = {}
 var game_in_progress := false
 ## Host's choice in the lobby: bots take the empty seats when the game starts.
 var fill_with_bots := true
+## Host's choice in the lobby: the night's first match uses the basic rules.
+var basic_first_match := true
 ## Shown by the lobby after being sent back there (e.g. "the host left").
 var last_message := ""
 ## --auto-host / --auto-join run once per launch, not every time the lobby reloads.
@@ -115,7 +117,7 @@ func start_game() -> void:
 	var forced := CmdArgs.value("--bot-kinds").split(",", false)  # e.g. --bot-kinds=kinci,dürüst
 	for i in mini(forced.size(), bot_kinds.size()):
 		bot_kinds[i] = forced[i]
-	Session.host_begin(roster, bot_kinds, night_seed)
+	Session.host_begin(roster, bot_kinds, night_seed, basic_first_match)
 
 
 ## Host only: everyone goes back to the lobby together, still connected.
