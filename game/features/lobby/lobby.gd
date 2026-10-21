@@ -1,5 +1,6 @@
 extends Control
-## Lobby: host or join a table through Steam, or on the local network for testing.
+## Lobby: play alone with bots, host or join a table through Steam, or on the local
+## network for testing. "Nasıl oynanır?" explains the rules before the first match.
 
 @onready var _name_edit: LineEdit = %NameEdit
 @onready var _steam_status_label: Label = %SteamStatusLabel
@@ -13,6 +14,10 @@ extends Control
 @onready var _host_button: Button = %HostButton
 @onready var _join_button: Button = %JoinButton
 @onready var _bots_check: CheckBox = %BotsCheck
+@onready var _basic_check: CheckBox = %BasicCheck
+@onready var _play_bots_button: Button = %PlayBotsButton
+@onready var _how_to_button: Button = %HowToButton
+@onready var _how_to_play: HowToPlay = %HowToPlay
 @onready var _start_button: Button = %StartButton
 @onready var _players_label: Label = %PlayersLabel
 @onready var _status_label: Label = %StatusLabel
@@ -31,6 +36,12 @@ func _ready() -> void:
 	_bots_check.toggled.connect(func(on: bool) -> void:
 		Network.fill_with_bots = on
 		_refresh())
+	_basic_check.button_pressed = Network.basic_first_match and not CmdArgs.has_flag("--no-tutorial")
+	Network.basic_first_match = _basic_check.button_pressed
+	_basic_check.toggled.connect(func(on: bool) -> void: Network.basic_first_match = on)
+	_play_bots_button.pressed.connect(_on_play_bots_pressed)
+	_how_to_button.pressed.connect(_how_to_play.show)
+	_show_how_to_once()
 	Network.roster_changed.connect(_on_roster_changed)
 	Network.connection_failed.connect(_on_connection_failed)
 	_steam_status_label.text = SteamService.status_message
@@ -47,6 +58,26 @@ func _ready() -> void:
 			_on_host_pressed()
 		elif CmdArgs.has_flag("--auto-join"):
 			_on_join_pressed()
+
+
+## The first time the game runs on this computer, the rules open by themselves.
+func _show_how_to_once() -> void:
+	const SEEN_FILE := "user://seen_how_to.cfg"
+	if CmdArgs.has_flag("--auto-host") or CmdArgs.has_flag("--auto-join") or FileAccess.file_exists(SEEN_FILE):
+		return
+	var seen := ConfigFile.new()
+	seen.set_value("how_to", "seen", true)
+	seen.save(SEEN_FILE)
+	_how_to_play.show()
+
+
+## One click: a table on this computer, bots in the other seats, and the game starts.
+func _on_play_bots_pressed() -> void:
+	if not Network.host_lan_game(_name_edit.text, _port()):
+		return
+	Network.fill_with_bots = true
+	_bots_check.button_pressed = true
+	Network.start_game()
 
 
 func _on_host_pressed() -> void:
@@ -105,6 +136,8 @@ func _refresh() -> void:
 	_start_button.visible = Network.is_host()
 	_start_button.disabled = not Network.can_start()
 	_bots_check.visible = Network.is_host()
+	_basic_check.visible = Network.is_host()
+	_play_bots_button.disabled = at_table
 	if not at_table:
 		_players_label.text = "Henüz bir masada değilsin."
 		return

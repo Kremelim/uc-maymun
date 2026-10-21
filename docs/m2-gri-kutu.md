@@ -1,6 +1,6 @@
 # M2 — Online gri kutu
 
-> Durum: **İlk sürüm hazır, ekip testi bekliyor** · Son güncelleme: 2026-10-21
+> Durum: **İkinci sürüm (anlaşılırlık turu) hazır, ekip testi bekliyor** · Son güncelleme: 2026-10-21
 > Mimari: [ADR-0002](adr/0002-online-mac-mimarisi.md) · Kurallar: [kurallar v0.3](gdd/kurallar-v0.3.md)
 
 Kurallar v0.3'ün tamamı online oynanıyor:
@@ -13,13 +13,27 @@ Kurallar v0.3'ün tamamı online oynanıyor:
 
 Maymunlar hâlâ gri kutu; sanat yok. Boş koltuklara bot oturuyor. Oyun sırasında biri çıkarsa yerine bot geçiyor.
 
+**Anlaşılırlık turu (ilk denemeden sonra):**
+
+İlk denemede oyunun akışı anlaşılmadı. Bu yüzden şunlar eklendi:
+- **Nasıl oynanır:** Lobide ve masada ("Kurallar" düğmesi) 7 sayfalık kısa anlatım. Oyun ilk kez açılınca kendiliğinden açılır.
+- **Temel kurallarla ilk maç:** Kefil, masa altı ve dükkan ikinci maçta açılır ([kurallar](gdd/kurallar-v0.3.md#ilk-maç-temel-kurallar)).
+- **Eylem kartı:** Her aşamada ne olduğunu ve ne yapacağını anlatan kart. Sıra sendeyse kenarı parlar ve başlıkta "Sıra sende" yazar.
+- **Büyük duyurular:** Beyanlar açıldı, kasada kaç jeton var, kim denetleniyor, YAKALANDI!, taksit ödendi/eksik, masa kurtuldu/battı.
+- **Masada:**
+  - Ortada kasadaki jetonlar ve "Kasa 8 / 12" yazısı.
+  - Her oyuncunun önünde beyan kartı: herkes beyan edene kadar kapalı (kırmızı), sonra açık.
+- **Botlar:** Teker teker ve yavaş oynuyor (1,4 sn), ne olduğunu takip edebilesin diye.
+- **Hesap Günü'nde ek satır:** Kim kaç kez yalan söyledi, kaçında yakalandı.
+
 ## Nasıl oynanır
 
 ### Tek başına, botlarla (en hızlı deneme)
 
-1. Godot'da **Debug → Customize Run Instances…** aç. **Enable Multiple Instances** işaretli kalsın, sayıyı **1** yap.
-2. 1. satırın Launch Arguments alanına: `-- --auto-host --auto-start=1 --name=Kerem`
-3. **F5**. Masa kurulur, 3 bot oturur, oyun başlar.
+1. Godot'da **Debug → Customize Run Instances…** aç. **Enable Multiple Instances**'ı kapat (4 pencere ayarı kalsa da olur, kapatınca tek pencere açılır).
+2. **F5**. Lobide adını yaz, **Botlarla oyna**'ya bas. Masa kurulur, 3 bot oturur, oyun başlar.
+
+İlk kez açılıyorsa önce "Nasıl oynanır" gelir; 7 sayfa, iki dakika.
 
 ### Kendi bilgisayarında 4 pencereyle
 
@@ -40,17 +54,20 @@ M1 B2'deki gibi:
 3. Host **Oyunu başlat**'a basar.
 
 **Boş koltuklara bot oturt** işaretliyse (varsayılan) eksik kişiler botla tamamlanır. Böylece 2 kişiyle de tam oyun oynanabilir. İşareti kaldırırsan en az 3 kişi gerekir.
+**İlk maç temel kurallarla** işaretliyse (varsayılan) ilk maçta kefil, masa altı ve dükkan yoktur. Oyunu bilen bir masa bunu kapatabilir.
 
 ## Ekran
 
-- **Üst çubuk:** maç ve tur, aşama, denetçi, bu tur ödenecek taksit, kasadaki jeton, pazarlık süresi.
+- **Üst çubuk:** maç ve tur, aşama, denetçi, bu tur ödenecek taksit, kasadaki jeton, pazarlık süresi, **Kurallar** düğmesi.
+- **Ortada, büyük:** önemli anların duyuruları (birkaç saniye görünür, kayıtta da kalır).
+- **Masa:** kasadaki jetonlar ve her oyuncunun önünde beyan kartı.
 - **Sol alt (sen):** gelirin (sadece sen görürsün), cebin, beyanın ve ödenen asgarin, senetlerin, aksesuarların, gece puanın, ses ayarları.
-- **Orta alt (ne yapacaksın):** o aşamanın düğmeleri. "Bekleniyor:" satırı kimin karar vermediğini gösterir.
+- **Orta alt (eylem kartı):** aşamanın adı, ne olduğu, ne yapacağın ve düğmeler. Sıra sendeyse kenarı parlar. Alttaki gri satır kimin beklendiğini gösterir.
 
   | Aşama | Ne yapılır |
   |---|---|
   | Beyan | Sayıyı seç, **Beyan et**. Herkes beyan edince açılır. Denetçinin kartı açık, beyanı gelirine kilitli. |
-  | Pazarlık | Kefil seçimi, masa altından jeton verme, **Pazarlığı bitir**. Herkes hazır olunca ya da 2 dakika dolunca biter. |
+  | Konuşma / Pazarlık | Konuşun. İkinci maçtan itibaren kefil olabilir, masa altından jeton verebilirsin. **Hazırım**. Herkes hazır olunca ya da 2 dakika dolunca biter. |
   | Katkı | Asgari zaten ödendi. Üstüne koyacağın jetonu seç, **Avucunu kapat**. |
   | Denetim (denetçi) | Kimi denetleyeceğini seç. Sonra kartını gör: **Raporluyorum** ya da **Temiz** (temiz dersen tazminat ödersin; yalanı görüp temiz demek örtbas). |
   | Denetim (diğerleri) | Bekle ya da masa altından rüşvet ver. |
@@ -58,7 +75,7 @@ M1 B2'deki gibi:
   | Hesap Günü | Bütün gelirler ve beyanlar (kırmızı = yalan), örtbaslar, masa altı transferler, servet, puan, gece toplamı. **Sonraki maça hazırım**. |
 
 - **Sağ alt (olaylar):** masada olan her şey. Sarı satırlar sadece seni ilgilendiren gizli şeyler (masa altı).
-- **Maymunların üstü:** ad, denetçi şapkası (sarı), beyan, katkı, kimin kefili olduğu, aksesuarlar, senet.
+- **Maymunların üstü:** ad, denetçi şapkası (sarı), katkı, kimin kefili olduğu, aksesuarlar, senet. Beyanlar masadaki kartlarda.
 
 ## Deneme listesi (ekibe)
 
@@ -78,7 +95,8 @@ Bir gece oynayın (4 maç, ~40–60 dakika) ve şunları not edin. Notları `doc
 | `--seed=N` | Geceyi aynı kartlarla tekrar oynatır (host). Seed her gece başında konsola yazılır. |
 | `--no-bots` | Lobide bot seçeneği kapalı başlar. |
 | `--bot-kinds=açgözlü,kinci` | Botların tipi (sırayla). Yoksa rastgele: dürüst, açgözlü, kinci, bedavacı. |
-| `--bot-delay=0` | Botlar beklemeden oynar (testler). Varsayılan 0,8 sn. |
+| `--bot-delay=0` | Botlar beklemeden oynar (testler). Varsayılan 1,4 sn, botlar teker teker. |
+| `--no-tutorial` | Lobide "İlk maç temel kurallarla" kapalı başlar. |
 | `--fake-voice` | Mikrofon yerine test tonu (M1'deki gibi). |
 
 Testler:

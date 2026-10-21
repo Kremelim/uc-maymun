@@ -1,6 +1,9 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://features/table/table.gd" id="1_table"]
+[ext_resource type="PackedScene" path="res://features/how_to/how_to_play.tscn" id="2_howto"]
+[ext_resource type="Script" path="res://features/table/table_props.gd" id="3_props"]
+[ext_resource type="Script" path="res://features/table/moment_banner.gd" id="4_banner"]
 
 [sub_resource type="Environment" id="Env_bar"]
 background_mode = 1
@@ -61,6 +64,36 @@ corner_radius_bottom_left = 8
 [sub_resource type="Theme" id="Theme_hud"]
 default_font_size = 14
 
+[sub_resource type="StyleBoxFlat" id="Style_action"]
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+bg_color = Color(0.08, 0.06, 0.05, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.3, 0.25, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="Style_banner"]
+content_margin_left = 28.0
+content_margin_top = 10.0
+content_margin_right = 28.0
+content_margin_bottom = 12.0
+bg_color = Color(0.06, 0.04, 0.03, 0.88)
+border_width_top = 2
+border_width_bottom = 2
+border_color = Color(0.85, 0.65, 0.25, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
 [node name="Table" type="Node3D"]
 script = ExtResource("1_table")
 
@@ -86,6 +119,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.375, 0)
 mesh = SubResource("Mesh_table_leg")
 
 [node name="Seats" type="Node3D" parent="."]
+
+[node name="Props" type="Node3D" parent="."]
+script = ExtResource("3_props")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 3)
@@ -123,6 +159,12 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.8, 0.35, 1)
+
+[node name="RulesButton" type="Button" parent="Hud/TopBar/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Kurallar"
 
 [node name="MePanel" type="PanelContainer" parent="Hud"]
 anchors_preset = 2
@@ -191,25 +233,31 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -200.0
+offset_left = -210.0
 offset_top = -8.0
-offset_right = 200.0
+offset_right = 210.0
 offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 0
 theme = SubResource("Theme_hud")
-theme_override_styles/panel = SubResource("Style_hud")
+theme_override_styles/panel = SubResource("Style_action")
 
 [node name="VBox" type="VBoxContainer" parent="Hud/ActionPanel"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
+[node name="ActionTitle" type="Label" parent="Hud/ActionPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.35, 1)
+theme_override_font_sizes/font_size = 20
+text = "Masa hazırlanıyor"
+
 [node name="ActionLabel" type="Label" parent="Hud/ActionPanel/VBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(380, 0)
+custom_minimum_size = Vector2(392, 0)
 layout_mode = 2
 autowrap_mode = 3
-text = "Masa hazırlanıyor…"
 
 [node name="DeclareRow" type="HBoxContainer" parent="Hud/ActionPanel/VBox"]
 unique_name_in_owner = true
@@ -310,6 +358,14 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Hazırım"
 
+[node name="WaitingLabel" type="Label" parent="Hud/ActionPanel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(392, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.6, 0.55, 1)
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 3
+
 [node name="LogPanel" type="PanelContainer" parent="Hud"]
 anchors_preset = 3
 anchor_left = 1.0
@@ -331,6 +387,16 @@ layout_mode = 2
 theme_override_font_sizes/normal_font_size = 13
 bbcode_enabled = true
 scroll_following = true
+
+[node name="ReckoningDim" type="ColorRect" parent="Hud"]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
 
 [node name="ReckoningPanel" type="PanelContainer" parent="Hud"]
 unique_name_in_owner = true
@@ -386,5 +452,45 @@ text = "Sonraki maça hazırım"
 unique_name_in_owner = true
 layout_mode = 2
 text = "Lobiye dön"
+
+[node name="Banner" type="PanelContainer" parent="Hud"]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -220.0
+offset_top = 70.0
+offset_right = 220.0
+offset_bottom = 150.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Style_banner")
+script = ExtResource("4_banner")
+
+[node name="VBox" type="VBoxContainer" parent="Hud/Banner"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="BannerTitle" type="Label" parent="Hud/Banner/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.82, 0.38, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 34
+text = "Beyanlar açıldı"
+horizontal_alignment = 1
+
+[node name="BannerSubtitle" type="Label" parent="Hud/Banner/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "Kayıp jeton: 3"
+horizontal_alignment = 1
+
+[node name="HowToPlay" parent="Hud" instance=ExtResource("2_howto")]
+unique_name_in_owner = true
 
 [node name="SelfVoice" type="AudioStreamPlayer" parent="."]

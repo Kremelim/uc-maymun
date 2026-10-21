@@ -4,10 +4,11 @@ extends Node3D
 
 const MONKEY_SCENE: PackedScene = preload("res://features/table/monkey_placeholder.tscn")
 const SEAT_RADIUS := 1.6
-const EYE_HEIGHT := 1.6
-## The camera sits behind the seat so the neighbours fit in view above the HUD.
-const CAMERA_BACK := 1.1
-const LOOK_TARGET := Vector3(0, 0.95, 0)
+const EYE_HEIGHT := 1.85
+## The camera sits behind and above the seat, looking down at the table, so the pot,
+## the cards and the neighbours all fit above the HUD.
+const CAMERA_BACK := 1.0
+const LOOK_TARGET := Vector3(0, 0.55, 0)
 ## The meter uses the same scaling as the mouths, so "full" means a wide-open mouth.
 const MIC_METER_GAIN := MonkeyPlaceholder.MOUTH_GAIN
 const NONE := MatchState.NONE
@@ -21,6 +22,9 @@ const PHASE_NAMES := {
 	MatchState.Phase.MATCH_OVER: "Hesap Günü",
 }
 const PRIVATE_COLOR := "#ffd166"
+## The action card's border: gold when the table waits for you, dim otherwise.
+const YOUR_TURN_BORDER := Color(1.0, 0.78, 0.3)
+const WAITING_BORDER := Color(0.35, 0.3, 0.25)
 const LIE_COLOR := Color(1.0, 0.45, 0.35)
 
 var _monkeys: Dictionary = {}  # seat -> MonkeyPlaceholder
@@ -32,6 +36,9 @@ var _transfer_seats: Array = []
 ## The round whose declaration box we already filled in, so a new view does not overwrite typing.
 var _declare_prefilled := []
 var _seconds_left := -1.0
+## The newest event already announced in the banner.
+var _last_event_id := -1
+var _action_style: StyleBoxFlat
 
 @onready var _seats_root: Node3D = $Seats
 @onready var _camera: Camera3D = $Camera3D
@@ -39,7 +46,14 @@ var _seconds_left := -1.0
 @onready var _debt_label: Label = %DebtLabel
 @onready var _timer_label: Label = %TimerLabel
 @onready var _me_label: Label = %MeLabel
+@onready var _action_panel: PanelContainer = $Hud/ActionPanel
+@onready var _action_title: Label = %ActionTitle
 @onready var _action_label: Label = %ActionLabel
+@onready var _waiting_label: Label = %WaitingLabel
+@onready var _rules_button: Button = %RulesButton
+@onready var _how_to_play: HowToPlay = %HowToPlay
+@onready var _banner: MomentBanner = %Banner
+@onready var _props: TableProps = $Props
 @onready var _declare_row: Control = %DeclareRow
 @onready var _declare_spin: SpinBox = %DeclareSpin
 @onready var _declare_button: Button = %DeclareButton
@@ -60,6 +74,7 @@ var _seconds_left := -1.0
 @onready var _ready_button: Button = %ReadyButton
 @onready var _log_text: RichTextLabel = %LogText
 @onready var _reckoning_panel: Control = %ReckoningPanel
+@onready var _reckoning_dim: Control = %ReckoningDim
 @onready var _reckoning_title: Label = %ReckoningTitle
 @onready var _reckoning_grid: GridContainer = %ReckoningGrid
 @onready var _reckoning_notes: Label = %ReckoningNotes
@@ -86,6 +101,9 @@ func _ready() -> void:
 	_next_button.pressed.connect(func() -> void: _send({"type": "ready"}))
 	_lobby_button.pressed.connect(func() -> void: Network.end_game("Gece bitti."))
 	_leave_button.pressed.connect(Network.leave)
+	_rules_button.pressed.connect(_how_to_play.show)
+	_action_style = (_action_panel.get_theme_stylebox("panel") as StyleBoxFlat).duplicate()
+	_action_panel.add_theme_stylebox_override("panel", _action_style)
 	_build_shop()
 	_build_seats()
 	_setup_voice()
@@ -126,6 +144,7 @@ func _build_seats() -> void:
 		monkey.look_at(Vector3.ZERO)
 		monkey.set_player_name(Session.seat_names[seat])
 		_monkeys[seat] = monkey
+	_props.setup(seat_count, my_seat)
 
 
 func _build_shop() -> void:
@@ -210,6 +229,8 @@ func _on_view_changed(view: Dictionary) -> void:
 	_update_actions()
 	_update_log()
 	_update_reckoning()
+	_props.update(view)
+	_announce_events(first)
 
 
 func _setup_voice_for_new_monkeys() -> void:
@@ -224,14 +245,15 @@ func _update_top() -> void:
 	var parts := PackedStringArray([
 		"Maç %d/%d" % [v["match_index"] + 1, v["matches_per_night"]],
 		"Tur %d/%d" % [v["round"] + 1, v["round_count"]],
-		PHASE_NAMES.get(phase, ""),
+		_phase_name(phase),
 		"Denetçi: %s" % _name(v["auditor"]),
 	])
 	if v["night_over"]:
 		parts = PackedStringArray(["Gece bitti"])
 	_phase_label.text = " · ".join(parts)
 	var carry: int = v["carry"]
-	var due_text := "Bu tur ödenecek: %d" % v["installment_due"]
+	var after_audit: bool = phase == MatchState.Phase.SHOP
+	var due_text := ("Sonraki tur ödenecek: %d" if after_audit else "Bu tur ödenecek: %d") % v["installment_due"]
 	if carry > 0:
 		due_text += " (%d devreden)" % carry
 	elif carry < 0:
@@ -272,8 +294,6 @@ func _update_monkeys() -> void:
 			lines.append("DENETÇİ")
 		if phase == MatchState.Phase.DECLARE:
 			lines.append("beyanını verdi" if v["declared"][seat] else "düşünüyor…")
-		elif not (v["declarations"] as PackedInt32Array).is_empty():
-			lines.append("beyan %d" % v["declarations"][seat])
 		if phase == MatchState.Phase.CONTRIBUTE:
 			lines.append("avucu kapalı" if v["contributed"][seat] else "katkı: ?")
 		elif not (v["contributions"] as PackedInt32Array).is_empty():
@@ -297,8 +317,10 @@ func _update_actions() -> void:
 	var seat := _my_seat()
 	var phase: int = v["phase"]
 	var auditing: bool = v["auditor"] == seat
+	var basic: bool = v["basic"]
 	for row: Control in [_declare_row, _vouch_row, _contribute_row, _target_buttons, _decide_row, _shop_grid, _transfer_row, _ready_button]:
 		row.visible = false
+	var title := _phase_name(phase)
 	var text := ""
 	match phase:
 		MatchState.Phase.DECLARE:
@@ -311,69 +333,100 @@ func _update_actions() -> void:
 				_declare_spin.value = v["my_income"]
 			_declare_spin.editable = not card_open
 			_declare_button.text = "Beyan et" if v["my_declaration"] == NONE else "Beyanı değiştir"
-			text = "Bu tur sana %d geldi. Masaya kaç diyeceksin? (Masaya toplam %d dağıtıldı.)" % [v["my_income"], v["total_income"]]
 			if card_open:
-				text = "Denetçisin: kartın herkese açık, beyanın gelirin (%d) olmak zorunda." % v["my_income"]
+				text = "Bu tur denetçisin: kartın herkese açık, beyanın gelirin (%d) olmak zorunda. Onayla." % v["my_income"]
+			else:
+				text = "Bu tur sana %d jeton geldi. Masaya kaç geldiğini söyle. Yalan söyleyebilirsin: az söylersen az ödersin, ama denetçi yakalarsa ceza ödersin." % v["my_income"]
+				text += "\nSöylediğinin %%%d'ı hemen kasaya gider." % roundi(Session.RULES.min_contribution_ratio * 100.0)
 			if v["my_declaration"] != NONE:
-				text += "\nBeyanın: %d. Herkes beyan edince açılacak." % v["my_declaration"]
+				text = "Beyanın: %d. Herkes beyan edince kartlar açılacak." % v["my_declaration"]
 		MatchState.Phase.NEGOTIATE:
-			_vouch_row.visible = true
-			_transfer_row.visible = true
 			_ready_button.visible = true
 			_ready_button.disabled = v["ready"][seat]
-			_ready_button.text = "Pazarlığı bitir (hazırım)"
-			_fill_vouch_options(seat, auditing)
-			text = "%s Konuşun, kefil olun, masa altından jeton verin." % _missing_text(v["missing"])
+			_ready_button.text = "Hazırım" if not v["ready"][seat] else "Diğerleri bekleniyor…"
+			text = _missing_text(v["missing"]) + " Konuşun: kim yalan söylüyor, kasa yetecek mi?"
+			if not basic:
+				_vouch_row.visible = true
+				_transfer_row.visible = true
+				_fill_vouch_options(seat, auditing)
+				text += " Kefil olabilir, masa altından jeton verebilirsin."
+			text += " Bitince \"Hazırım\"."
 		MatchState.Phase.CONTRIBUTE:
 			var due: int = v["installment_due"]
-			text = "Asgarin ödendi. Kasada %d var, bu tur %d ödenecek. Üstüne ne kadar koyacaksın?" % [v["pot"], due]
+			var gap: int = due - int(v["pot"])
+			if gap > 0:
+				text = "Kasada %d var, bu tur %d lazım: %d eksik. Eksik kalırsa borç faiziyle büyür." % [v["pot"], due, gap]
+			else:
+				text = "Kasada %d var, bu tur %d lazım: taksit asgarilerle zaten ödendi." % [v["pot"], due]
 			if v["my_extra"] == NONE:
 				_contribute_row.visible = true
 				_extra_spin.max_value = v["my_cash"]
 				_extra_spin.value = mini(int(_extra_spin.value), v["my_cash"])
+				text += "\nÜstüne koymak istediğini seç (istemezsen 0) ve avucunu kapat. Herkesinki aynı anda açılır."
 			else:
-				text += "\nAvucuna %d koydun. Diğerleri bekleniyor." % v["my_extra"]
+				text += "\nAvucuna %d koydun." % v["my_extra"]
 		MatchState.Phase.AUDIT_CHOOSE:
-			_transfer_row.visible = not auditing
 			if auditing:
+				title = "Denetim · sen denetçisin"
 				_target_buttons.visible = true
 				_fill_target_buttons(seat)
-				text = "Denetçisin. Kimin kartına bakacaksın?"
+				text = "Kimin kartına bakacaksın? %s Parantezde beyanları var." % _missing_text(v["missing"])
 			else:
-				text = "%s kimi denetleyeceğini seçiyor. Rüşvet teklif etmek için masa altını kullan." % _name(v["auditor"])
+				_transfer_row.visible = not basic
+				text = "%s kimi denetleyeceğini seçiyor." % _name(v["auditor"])
+				if not basic:
+					text += " Rüşvet teklif etmek istersen masa altını kullan."
 		MatchState.Phase.AUDIT_DECIDE:
 			var target: int = v["audit_target"]
 			if auditing:
+				title = "Denetim · karar senin"
 				_decide_row.visible = true
-				_transfer_row.visible = true
+				_transfer_row.visible = not basic
 				var declared: int = v["declarations"][target]
 				var peek: int = v["audit_peek"]
-				text = "Denetlediğin: %s. Kartı %d, beyanı %d: " % [_name(target), peek, declared]
-				text += "yalan, fark %d." % absi(peek - declared) if peek != declared else "doğru söylemiş."
-				text += "\nRaporlarsan kart herkese açılır. \"Temiz\" dersen %d jeton tazminat ödersin." % Session.RULES.audit_compensation
+				var lie := peek - declared
+				text = "%s: kartında %d, beyanı %d." % [_name(target), peek, declared]
+				if lie != 0:
+					text += " YALAN, fark %d!\nRaporlarsan saklanan para kasaya döner ve sana %d ceza öder. \"Temiz\" dersen göz yummuş olursun (örtbas): maç sonunda herkes görür." % [absi(lie), MatchState.fine_with(Session.RULES, lie)]
+				else:
+					text += " Doğru söylemiş.\n\"Temiz\" de; ona %d jeton tazminat ödersin." % Session.RULES.audit_compensation
 			else:
-				_transfer_row.visible = true
+				_transfer_row.visible = not basic
 				text = "Denetim: %s → %s. Kart inceleniyor…" % [_name(v["auditor"]), _name(target)]
+				if target == seat:
+					text = "%s senin kartına bakıyor!" % _name(v["auditor"])
 		MatchState.Phase.SHOP:
+			title = "Tur sonu · dükkan"
 			_ready_button.visible = true
 			_ready_button.disabled = v["ready"][seat]
-			_ready_button.text = "Turu bitir (hazırım)"
+			_ready_button.text = "Turu bitir" if not v["ready"][seat] else "Diğerleri bekleniyor…"
 			_shop_grid.visible = true
 			for item in _shop_grid.get_child_count():
 				(_shop_grid.get_child(item) as Button).disabled = Session.RULES.accessory_prices[item] > v["my_cash"]
-			text = "%s\nAksesuar alabilirsin: herkes görür, maç sonunda değeri artar, cezada haczedilir." % _audit_summary()
+			text = "%s Aksesuar alabilirsin: herkes görür, maç sonunda değeri artar, cezada haczedilir." % _audit_summary()
 		MatchState.Phase.MATCH_OVER:
+			title = "Hesap Günü"
 			text = "Maç bitti."
 	if v["night_over"]:
-		text = "Gece bitti."
-	var waiting := _waiting_text()
-	if waiting != "":
-		text += "\n" + waiting
+		title = "Gece bitti"
+		text = ""
+	var my_turn: bool = seat in v["awaiting"] and not v["night_over"]
+	_action_title.text = ("Sıra sende · " + title) if my_turn else title
 	_action_label.text = text
+	_action_label.visible = text != ""
+	_action_style.border_color = YOUR_TURN_BORDER if my_turn else WAITING_BORDER
+	_waiting_label.text = _waiting_text()
+	_waiting_label.visible = _waiting_label.text != ""
 	_transfer_spin.max_value = maxi(1, v["my_cash"])
 	_transfer_button.disabled = v["my_cash"] == 0
 	if _transfer_row.visible:
 		_fill_transfer_options(seat)
+
+
+func _phase_name(phase: int) -> String:
+	if phase == MatchState.Phase.NEGOTIATE and _view.get("basic", false):
+		return "Konuşma"
+	return PHASE_NAMES.get(phase, "")
 
 
 func _fill_vouch_options(seat: int, auditing: bool) -> void:
@@ -437,6 +490,69 @@ func _audit_summary() -> String:
 	return "%s temiz çıktı." % _name(audit["target"])
 
 
+## Shows the moments of the newest events in the banner. On the first view only the
+## round we arrive in, not the whole history.
+func _announce_events(first: bool) -> void:
+	var events: Array = _view["events"]
+	if events.is_empty():
+		return
+	if _view.has("reckoning"):
+		# Hesap Günü's table says it all, and the banner would cover its title.
+		_last_event_id = events[-1]["id"]
+		_banner.clear()
+		_banner.hide()
+		return
+	if first:
+		_last_event_id = events[-1]["id"]
+		var v := _view
+		_banner.announce("Maç %d · Tur %d" % [v["match_index"] + 1, v["round"] + 1], "Denetçi: %s" % _name(v["auditor"]))
+		return
+	for event: Dictionary in events:
+		if event["id"] > _last_event_id:
+			_last_event_id = event["id"]
+			_announce(event)
+
+
+func _announce(e: Dictionary) -> void:
+	match str(e["type"]):
+		"match_started":
+			var how := "Temel kurallar: kefil, masa altı ve dükkan yok." if e["basic"] else "Tam kurallar: kefil, masa altı ve dükkan açık."
+			_banner.announce("Maç %d" % (e["match"] + 1), how)
+		"round_started":
+			_banner.announce("Tur %d" % (e["round"] + 1), "Denetçi: %s" % _name(e["auditor"]))
+		"declarations_revealed":
+			var missing: int = e["missing"]
+			if missing > 0:
+				_banner.announce("Beyanlar açıldı", "Kayıp jeton: %d. Birileri az söyledi!" % missing)
+			elif missing < 0:
+				_banner.announce("Beyanlar açıldı", "Beyan fazlası: %d. Biri fazla söyledi!" % -missing)
+			else:
+				_banner.announce("Beyanlar açıldı", "Kayıp jeton yok.")
+		"contributions_revealed":
+			var enough: bool = e["pot"] >= e["due"]
+			_banner.announce("Kasada %d jeton" % e["pot"], "Bu tur %d lazım" % e["due"],
+				MomentBanner.GOOD_COLOR if enough else MomentBanner.TITLE_COLOR)
+		"audit_target":
+			_banner.announce("Denetim", "%s → %s" % [_name(e["auditor"]), _name(e["target"])])
+		"audit_result":
+			if e["caught"]:
+				_banner.announce("YAKALANDI!", "%s yalan söylemiş: fark %d" % [_name(e["target"]), e["difference"]], MomentBanner.BAD_COLOR)
+			else:
+				_banner.announce("Temiz", "Denetçi: %s temiz" % _name(e["target"]))
+		"installment":
+			if e["pot"] >= e["due"]:
+				_banner.announce("Taksit ödendi", "%d / %d" % [e["pot"], e["due"]], MomentBanner.GOOD_COLOR)
+			else:
+				_banner.announce("Taksit eksik!", "Borç faiziyle büyüdü: %d devretti" % e["carry"], MomentBanner.BAD_COLOR)
+		"match_over":
+			if e["succeeded"]:
+				_banner.announce("Masa kurtuldu!", "Hesap Günü", MomentBanner.GOOD_COLOR)
+			else:
+				_banner.announce("Masa battı!", "Herkes 0 puan", MomentBanner.BAD_COLOR)
+		"replaced":
+			_banner.announce("%s kalktı" % Session.seat_names[e["seat"]], "Yerine bot oynuyor")
+
+
 func _update_log() -> void:
 	var lines := PackedStringArray()
 	for event: Dictionary in _view["events"]:
@@ -491,6 +607,7 @@ func _update_reckoning() -> void:
 	var v := _view
 	var shown: bool = v.has("reckoning")
 	_reckoning_panel.visible = shown
+	_reckoning_dim.visible = shown
 	if not shown:
 		return
 	var reckoning: Dictionary = v["reckoning"]
@@ -517,6 +634,17 @@ func _update_reckoning() -> void:
 			notes.append("Tur %d: %s, %s yalanını ÖRTBAS etti." % [round_entry["round"] + 1, _name(round_entry["auditor"]), _name(audit["target"])])
 		for t: Dictionary in round_entry["transfers"]:
 			notes.append("Tur %d: masa altı %s → %s, %d jeton." % [round_entry["round"] + 1, _name(t["from"]), _name(t["to"]), t["amount"]])
+	_grid_cell("Yalan (yakalanan)")
+	for s in seat_count:
+		var lies := 0
+		var caught := 0
+		for round_entry: Dictionary in reckoning["rounds"]:
+			if (round_entry["incomes"] as PackedInt32Array)[s] != (round_entry["declarations"] as PackedInt32Array)[s]:
+				lies += 1
+			var audit: Dictionary = round_entry["audit"]
+			if audit.get("target", NONE) == s and audit.get("caught", false):
+				caught += 1
+		_grid_cell("%d (%d)" % [lies, caught])
 	_grid_cell("Servet", true)
 	for s in seat_count:
 		_grid_cell(str(reckoning["wealth"][s]), true)

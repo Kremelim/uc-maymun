@@ -1,6 +1,43 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://features/lobby/lobby.gd" id="1_lobby"]
+[ext_resource type="PackedScene" path="res://features/how_to/how_to_play.tscn" id="2_howto"]
+
+[sub_resource type="Theme" id="Theme_lobby"]
+default_font_size = 15
+
+[sub_resource type="StyleBoxFlat" id="Style_column"]
+content_margin_left = 16.0
+content_margin_top = 14.0
+content_margin_right = 16.0
+content_margin_bottom = 14.0
+bg_color = Color(0.1, 0.075, 0.055, 0.95)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="Style_primary"]
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+bg_color = Color(0.85, 0.62, 0.2, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="Style_primary_hover"]
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+bg_color = Color(0.95, 0.72, 0.28, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 
 [node name="Lobby" type="Control"]
 layout_mode = 3
@@ -9,7 +46,17 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = SubResource("Theme_lobby")
 script = ExtResource("1_lobby")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.16, 0.1, 0.07, 1)
 
 [node name="Center" type="CenterContainer" parent="."]
 layout_mode = 1
@@ -19,115 +66,187 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBox" type="VBoxContainer" parent="Center"]
-custom_minimum_size = Vector2(420, 0)
+[node name="Columns" type="HBoxContainer" parent="Center"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="PlayColumn" type="PanelContainer" parent="Center/Columns"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("Style_column")
+
+[node name="VBox" type="VBoxContainer" parent="Center/Columns/PlayColumn"]
+custom_minimum_size = Vector2(380, 0)
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Title" type="Label" parent="Center/VBox"]
+[node name="Title" type="Label" parent="Center/Columns/PlayColumn/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "Üç Maymun — gri kutu"
+theme_override_colors/font_color = Color(1, 0.8, 0.35, 1)
+theme_override_font_sizes/font_size = 34
+text = "Üç Maymun"
 horizontal_alignment = 1
 
-[node name="NameEdit" type="LineEdit" parent="Center/VBox"]
+[node name="Tagline" type="Label" parent="Center/Columns/PlayColumn/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.8, 0.72, 1)
+text = "Borcu birlikte ödeyin, cebe en çok parayı siz atın."
+horizontal_alignment = 1
+
+[node name="NameEdit" type="LineEdit" parent="Center/Columns/PlayColumn/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "Adın"
 
-[node name="SteamStatusLabel" type="Label" parent="Center/VBox"]
+[node name="PlayBotsButton" type="Button" parent="Center/Columns/PlayColumn/VBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(420, 0)
 layout_mode = 2
-text = "Steam kontrol ediliyor…"
+theme_override_colors/font_color = Color(0.1, 0.06, 0.03, 1)
+theme_override_colors/font_hover_color = Color(0.1, 0.06, 0.03, 1)
+theme_override_colors/font_pressed_color = Color(0.1, 0.06, 0.03, 1)
+theme_override_font_sizes/font_size = 19
+theme_override_styles/normal = SubResource("Style_primary")
+theme_override_styles/hover = SubResource("Style_primary_hover")
+theme_override_styles/pressed = SubResource("Style_primary")
+text = "Botlarla oyna (tek başına)"
+
+[node name="HowToButton" type="Button" parent="Center/Columns/PlayColumn/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Nasıl oynanır?"
+
+[node name="TableSeparator" type="HSeparator" parent="Center/Columns/PlayColumn/VBox"]
+layout_mode = 2
+
+[node name="PlayersLabel" type="Label" parent="Center/Columns/PlayColumn/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(348, 0)
+layout_mode = 2
 autowrap_mode = 3
-
-[node name="SteamSection" type="VBoxContainer" parent="Center/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="SteamButtons" type="HBoxContainer" parent="Center/VBox/SteamSection"]
-layout_mode = 2
-
-[node name="SteamHostButton" type="Button" parent="Center/VBox/SteamSection/SteamButtons"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Steam masası kur"
-
-[node name="InviteButton" type="Button" parent="Center/VBox/SteamSection/SteamButtons"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Arkadaş davet et"
-
-[node name="CodeRow" type="HBoxContainer" parent="Center/VBox/SteamSection"]
-layout_mode = 2
-
-[node name="LobbyCodeEdit" type="LineEdit" parent="Center/VBox/SteamSection/CodeRow"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "Lobi kodu"
-
-[node name="JoinCodeButton" type="Button" parent="Center/VBox/SteamSection/CodeRow"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Kodla katıl"
-
-[node name="CopyCodeButton" type="Button" parent="Center/VBox/SteamSection/CodeRow"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Kodu kopyala"
-
-[node name="Separator" type="HSeparator" parent="Center/VBox"]
-layout_mode = 2
-
-[node name="LanLabel" type="Label" parent="Center/VBox"]
-layout_mode = 2
-text = "Yerel ağ (aynı bilgisayar / aynı ev)"
-
-[node name="AddressEdit" type="LineEdit" parent="Center/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "127.0.0.1"
-placeholder_text = "Host'un adresi"
-
-[node name="Buttons" type="HBoxContainer" parent="Center/VBox"]
-layout_mode = 2
-
-[node name="HostButton" type="Button" parent="Center/VBox/Buttons"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Masa kur (yerel)"
-
-[node name="JoinButton" type="Button" parent="Center/VBox/Buttons"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Masaya katıl (yerel)"
-
-[node name="PlayersLabel" type="Label" parent="Center/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
 text = "Henüz bir masada değilsin."
 
-[node name="BotsCheck" type="CheckBox" parent="Center/VBox"]
+[node name="BotsCheck" type="CheckBox" parent="Center/Columns/PlayColumn/VBox"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 button_pressed = true
 text = "Boş koltuklara bot oturt"
 
-[node name="StartButton" type="Button" parent="Center/VBox"]
+[node name="BasicCheck" type="CheckBox" parent="Center/Columns/PlayColumn/VBox"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
+button_pressed = true
+text = "İlk maç temel kurallarla (öğretici)"
+
+[node name="StartButton" type="Button" parent="Center/Columns/PlayColumn/VBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.1, 0.06, 0.03, 1)
+theme_override_colors/font_hover_color = Color(0.1, 0.06, 0.03, 1)
+theme_override_colors/font_pressed_color = Color(0.1, 0.06, 0.03, 1)
+theme_override_styles/normal = SubResource("Style_primary")
+theme_override_styles/hover = SubResource("Style_primary_hover")
+theme_override_styles/pressed = SubResource("Style_primary")
 text = "Oyunu başlat"
 
-[node name="StatusLabel" type="Label" parent="Center/VBox"]
+[node name="StatusLabel" type="Label" parent="Center/Columns/PlayColumn/VBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(420, 0)
+custom_minimum_size = Vector2(348, 0)
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.35, 1)
 autowrap_mode = 3
+
+[node name="FriendsColumn" type="PanelContainer" parent="Center/Columns"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("Style_column")
+
+[node name="VBox" type="VBoxContainer" parent="Center/Columns/FriendsColumn"]
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="FriendsTitle" type="Label" parent="Center/Columns/FriendsColumn/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.35, 1)
+theme_override_font_sizes/font_size = 20
+text = "Arkadaşlarla (Steam)"
+
+[node name="SteamStatusLabel" type="Label" parent="Center/Columns/FriendsColumn/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(348, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Steam kontrol ediliyor…"
+autowrap_mode = 3
+
+[node name="SteamSection" type="VBoxContainer" parent="Center/Columns/FriendsColumn/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SteamButtons" type="HBoxContainer" parent="Center/Columns/FriendsColumn/VBox/SteamSection"]
+layout_mode = 2
+
+[node name="SteamHostButton" type="Button" parent="Center/Columns/FriendsColumn/VBox/SteamSection/SteamButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Steam masası kur"
+
+[node name="InviteButton" type="Button" parent="Center/Columns/FriendsColumn/VBox/SteamSection/SteamButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Arkadaş davet et"
+
+[node name="CodeRow" type="HBoxContainer" parent="Center/Columns/FriendsColumn/VBox/SteamSection"]
+layout_mode = 2
+
+[node name="LobbyCodeEdit" type="LineEdit" parent="Center/Columns/FriendsColumn/VBox/SteamSection/CodeRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Lobi kodu"
+
+[node name="JoinCodeButton" type="Button" parent="Center/Columns/FriendsColumn/VBox/SteamSection/CodeRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Kodla katıl"
+
+[node name="CopyCodeButton" type="Button" parent="Center/Columns/FriendsColumn/VBox/SteamSection/CodeRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Kodu kopyala"
+
+[node name="Separator" type="HSeparator" parent="Center/Columns/FriendsColumn/VBox"]
+layout_mode = 2
+
+[node name="LanLabel" type="Label" parent="Center/Columns/FriendsColumn/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Yerel ağ (aynı bilgisayar ya da aynı ev; test için)"
+
+[node name="AddressEdit" type="LineEdit" parent="Center/Columns/FriendsColumn/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "127.0.0.1"
+placeholder_text = "Host'un adresi"
+
+[node name="Buttons" type="HBoxContainer" parent="Center/Columns/FriendsColumn/VBox"]
+layout_mode = 2
+
+[node name="HostButton" type="Button" parent="Center/Columns/FriendsColumn/VBox/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Masa kur (yerel)"
+
+[node name="JoinButton" type="Button" parent="Center/Columns/FriendsColumn/VBox/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Masaya katıl (yerel)"
+
+[node name="HowToPlay" parent="." instance=ExtResource("2_howto")]
+unique_name_in_owner = true
+layout_mode = 1

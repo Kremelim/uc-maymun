@@ -27,7 +27,8 @@
 - Kural motoru (`core/match_state.gd`) ve simülatör (`sim/`) hazır. Oyun `data/rules_v0_3.tres` kullanır.
 - M2 online gri kutu: kuralların tamamı online (`core/night.gd` gece akışı, `net/session.gd` host, `features/table/` arayüz).
   Boş koltuklara ve çıkanların yerine bot (`sim/seat_bot.gd`). Mimari: `docs/adr/0002-online-mac-mimarisi.md`, kullanım: `docs/m2-gri-kutu.md`.
-  Ekip testi bekliyor.
+  İlk denemede (Kerem, botlarla) oyun anlaşılmadı. Anlaşılırlık turu yapıldı: nasıl oynanır ekranı, eylem kartı, büyük duyurular,
+  masada jeton ve beyan kartları, temel kurallarla ilk maç. Görünüş (karakter, ortam) M3'te. Ekip testi bekliyor.
 - Kurallar v0.3 (2026-10-21, Kerem Ataç kabul etti): v0.2 (denetçinin kartı açık, asgari katkı beyanın %60'ı ve beyanlar açılınca ödenir,
   son tur dükkanı kapalı, fazla beyan da yalan, en az 3 oyuncu) + ödenemeyen ceza senet olur + gece 4 maç, ilk denetçi her maç kayar.
   Açık sorular ve Kerem Gönç'ün kararını bekleyenler: `docs/sim/bulgular-v0.3.md`. Kağıt prototip henüz oynanmadı.
@@ -56,7 +57,8 @@
     Kural sürümü değişince: yeni `data/rules_vX.tres`, `simulate.gd`'de `RULES` ve deneyler, yeni `sonuclar-`/`bulgular-` dosyaları.
     Eski raporlar, onları üreten commit not edilerek kalır.
   - Görsel kontrol (botlar bir geceyi istenen aşamaya kadar oynar, masa Xvfb altında çizilip PNG kaydedilir): kullanımı
-    `game/tests/visual/render_table.gd` başında. Arayüz değiştiğinde birkaç aşamayı (`STATE=`) çizip görüntülere bak.
+    `game/tests/visual/render_table.gd` başında. Arayüz değiştiğinde birkaç aşamayı (`STATE=`, tam kurallar için `MATCH=1`,
+    kurallar ekranı için `HOWTO=1`) çizip görüntülere bak.
 - CI (`.github/workflows/ci.yml`) her PR'da import, uyarı kontrolü, unit, kısa bir simülatör çalıştırması ve E2E çalıştırır.
 - Sahne düğümü uyarıları (ör. autowrap'li Label'a minimum genişlik) bu kontrole girmez; .tscn yazarken dikkat.
 
