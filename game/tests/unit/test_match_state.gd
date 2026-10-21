@@ -1,9 +1,10 @@
 extends TestSuite
 ## The rules as executable checks. Most tests start from v0.1 (docs/gdd/kurallar-v0.1.md)
-## and turn on one v0.2 switch at a time. Seat 0 audits round 1.
+## and turn on one later switch at a time. Seat 0 audits round 1.
 
 const RULES: RulesConfig = preload("res://data/rules_v0_1.tres")
 const RULES_V0_2: RulesConfig = preload("res://data/rules_v0_2.tres")
+const RULES_V0_3: RulesConfig = preload("res://data/rules_v0_3.tres")
 
 
 func _match(rules: RulesConfig = RULES) -> MatchState:
@@ -48,7 +49,7 @@ func test_rules_data_matches_design_doc() -> void:
 	assert_eq(RULES.round_count, 4, "rounds")
 	assert_eq(RULES.installment, 12, "installment")
 	assert_eq(RULES.shortfall_interest, 1.5, "interest")
-	assert_eq(RULES.fine_multiplier, 1, "fine multiplier")
+	assert_eq(RULES.fine_multiplier, 1.0, "fine multiplier")
 	assert_eq(RULES.audit_compensation, 1, "compensation for a clean audit")
 	assert_eq(RULES.vouch_reward, 2, "vouch reward")
 	assert_eq(RULES.accessory_prices, PackedInt32Array([4, 6, 8, 12, 20]), "accessory prices")
@@ -74,6 +75,17 @@ func test_v0_2_data_matches_design_doc() -> void:
 			minimums += state.minimum_for(income)
 		assert_true(minimums >= RULES_V0_2.installment and minimums <= RULES_V0_2.installment + 2,
 			"honest minimums for %s: %d" % [income_set, minimums])
+
+
+func test_v0_3_data_matches_design_doc() -> void:
+	assert_eq(RULES_V0_3.unpaid_becomes_iou, true, "unpaid fines become IOUs")
+	assert_eq(RULES_V0_3.rotate_first_auditor, true, "the first auditor moves on each match")
+	assert_eq(RULES_V0_3.matches_per_night, 4, "a night of 4: everyone audits first once")
+	for property: String in ["min_players", "max_players", "round_count", "income_sets", "installment",
+			"shortfall_interest", "fine_multiplier", "audit_compensation", "vouch_reward", "over_declaration_is_lie",
+			"auditor_card_open", "min_contribution_ratio", "accessory_names", "accessory_prices", "accessory_values",
+			"last_round_shop", "placement_points"]:
+		assert_eq(RULES_V0_3.get(property), RULES_V0_2.get(property), "%s unchanged from v0.2" % property)
 
 
 func test_same_seed_same_incomes() -> void:
@@ -200,6 +212,43 @@ func test_fines_sell_accessories_and_the_rest_becomes_debt() -> void:
 	assert_eq(state.cash[0], 5 - 3 + 3, "the auditor only gets what could be paid")
 	# Pot 9 + 5 returned = 14: 2 of credit, cancelled by the 2 unpaid coins.
 	assert_eq(state.carry, 0, "unpaid fine joins the common debt")
+
+
+func test_unpaid_fine_becomes_an_iou() -> void:
+	var rules: RulesConfig = RULES.duplicate()
+	rules.unpaid_becomes_iou = true
+	var state := _match(rules)
+	_set_incomes(state, [5, 5, 5, 5])
+	state.cash[3] = 0
+	(state.accessories[3] as Array).append(2)  # a Saat (price 8)
+	_declare_all(state, [5, 5, 5, 0])
+	state.end_negotiation()
+	_contribute_all(state, [3, 3, 3, 0])
+	state.choose_audit_target(3)
+	state.resolve_audit(true)
+	# As in the test above, 2 coins of the fine cannot be paid; now seat 3 owes them to the auditor.
+	assert_eq(state.ious, [{"from": 3, "to": 0, "amount": 2, "round": 0}], "an IOU instead of common debt")
+	assert_eq(state.carry, -2, "the table keeps its credit")
+	assert_eq(state.wealth(3), -2, "the IOU comes off the liar's wealth")
+	assert_eq(state.wealth(0), 5 - 3 + 3 + 2, "and goes onto the auditor's")
+	assert_eq(state.view_for(1)["ious"], state.ious, "IOUs are public")
+
+
+func test_fine_multiplier_rounds_up() -> void:
+	var rules: RulesConfig = RULES.duplicate()
+	rules.fine_multiplier = 0.5
+	var state := _match(rules)
+	assert_eq(state.fine_for(3), 2, "half of 3, rounded up")
+	assert_eq(state.fine_for(-4), 2, "over-declared by 4")
+
+
+func test_first_auditor_moves_on_each_match() -> void:
+	var state := MatchState.new(RULES, 4, 7, 2)
+	state.start_round()
+	assert_eq(state.auditor(), 2, "seat 2 audits round 1")
+	assert_eq(MatchState.first_auditor_of(RULES, 2, 4), 0, "fixed before v0.3")
+	assert_eq(MatchState.first_auditor_of(RULES_V0_3, 2, 4), 2, "third match of the night starts at seat 2")
+	assert_eq(MatchState.first_auditor_of(RULES_V0_3, 5, 4), 1, "and wraps around")
 
 
 func test_hidden_information_in_views() -> void:

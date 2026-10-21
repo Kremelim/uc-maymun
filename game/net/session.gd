@@ -6,7 +6,7 @@ extends Node
 signal public_state_changed(snapshot: Dictionary)
 signal private_view_changed(view: Dictionary)
 
-const RULES: RulesConfig = preload("res://data/rules_v0_2.tres")
+const RULES: RulesConfig = preload("res://data/rules_v0_3.tres")
 
 ## Latest data this peer is allowed to see. Cached so a scene that loads late can read it.
 var public_state: Dictionary = {}

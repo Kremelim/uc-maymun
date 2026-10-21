@@ -187,10 +187,10 @@ func _accessory_spend(view: Dictionary, seat: int) -> int:
 
 ## Rough guess: does it end richer than everyone else, from what others declared and spent?
 func _expects_to_win(view: Dictionary, my_extra: int) -> bool:
-	var mine := int(view["my_cash"]) - my_extra + _accessory_value(view, view["seat"])
+	var mine := int(view["my_cash"]) - my_extra + _accessory_value(view, view["seat"]) + MatchState.balance_of(view["ious"], view["seat"])
 	for seat in int(view["seat_count"]):
 		if seat != view["seat"]:
-			var theirs := _explainable_cash(view, seat) + _accessory_value(view, seat)
+			var theirs := _explainable_cash(view, seat) + _accessory_value(view, seat) + MatchState.balance_of(view["ious"], seat)
 			if theirs > mine:
 				return false
 	return true

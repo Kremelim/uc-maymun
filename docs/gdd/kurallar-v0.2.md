@@ -1,6 +1,8 @@
 # Kurallar v0.2 — Kağıt prototip
 
-> Durum: **Test edilecek taslak** · Son güncelleme: 2026-10-21
+> Durum: **Yerini [v0.3](kurallar-v0.3.md) aldı** (2026-10-21). Neyin neden değiştiğini görmek için duruyor.
+>
+> Eski durum: Test edilecek taslak · Son güncelleme: 2026-10-21
 >
 > - v0.1'deki simülasyon önerileri uygulandı ([farklar](#v01den-farklar)). Kerem Ataç kabul etti (2026-10-21).
 > - **[ÖNERİ]** işaretli kurallar Claude'un önerisi; fikir sahibinin (Kerem Gönç) onayı gerekiyor.

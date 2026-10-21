@@ -1,7 +1,7 @@
 class_name MatchState
 extends RefCounted
-## One whole match under the paper prototype rules (docs/gdd/kurallar-v0.2.md;
-## RulesConfig switches turn it back into v0.1). Pure and seeded:
+## One whole match under the paper prototype rules (docs/gdd/kurallar-v0.3.md;
+## RulesConfig switches turn it back into earlier versions). Pure and seeded:
 ## no nodes, no networking. Whoever runs the match (the host, or the simulator)
 ## feeds it each phase's decisions in order. Players may only see view_for(seat)
 ## and, as the auditor, audit_peek(); reveal() is for Hesap Günü at the end.
@@ -17,6 +17,8 @@ const TO_POT := -2
 
 var rules: RulesConfig
 var seat_count: int
+## Who audits the first round; the others follow in seat order.
+var first_auditor := 0
 var phase := Phase.ROUND_OVER
 var round_index := -1
 ## Debt carried into the next installment. Negative means credit.
@@ -38,6 +40,8 @@ var audit_target := NONE
 
 ## Public record of each finished round.
 var history: Array[Dictionary] = []
+## Unpaid debts between players (rules.unpaid_becomes_iou): {"from", "to", "amount", "round"}. Public.
+var ious: Array[Dictionary] = []
 
 var _secrets: Array[Dictionary] = []  # per finished round, for Hesap Günü
 var _transfers: Array[Dictionary] = []  # this round's under-the-table transfers
@@ -48,10 +52,11 @@ var _unpaid := 0  # payments nobody could make this round; they join the common 
 var _rng := RandomNumberGenerator.new()
 
 
-func _init(p_rules: RulesConfig, p_seat_count: int, match_seed: int) -> void:
+func _init(p_rules: RulesConfig, p_seat_count: int, match_seed: int, p_first_auditor: int = 0) -> void:
 	assert(p_seat_count >= 2 and p_seat_count <= p_rules.max_players, "seat count out of range")
 	rules = p_rules
 	seat_count = p_seat_count
+	first_auditor = posmod(p_first_auditor, seat_count)
 	_rng.seed = match_seed
 	cash.resize(seat_count)
 	total_contributed.resize(seat_count)
@@ -60,7 +65,12 @@ func _init(p_rules: RulesConfig, p_seat_count: int, match_seed: int) -> void:
 
 
 func auditor() -> int:
-	return round_index % seat_count
+	return (first_auditor + round_index) % seat_count
+
+
+## Who audits first in match `match_index` (from 0) of a night.
+static func first_auditor_of(p_rules: RulesConfig, match_index: int, p_seat_count: int) -> int:
+	return match_index % p_seat_count if p_rules.rotate_first_auditor else 0
 
 
 func is_last_round() -> bool:
@@ -145,7 +155,7 @@ func end_negotiation() -> void:
 
 ## What a declaration of `amount` obliges a seat to pay right away under min_contribution_ratio.
 func minimum_for(amount: int) -> int:
-	return ceili(amount * rules.min_contribution_ratio)
+	return ceili(amount * rules.min_contribution_ratio - 0.000001)  # 25 × 0.56 = 14.000000000000002 must stay 14
 
 
 ## Contributions on top of the minimum, in closed fists: they count once everyone has chosen.
@@ -177,6 +187,10 @@ func audit_peek() -> int:
 	return incomes[audit_target]
 
 
+func fine_for(lie: int) -> int:
+	return ceili(absi(lie) * rules.fine_multiplier)
+
+
 ## How far `seat`'s declaration is from the truth in a way the rules call a lie:
 ## positive = hid coins, negative = over-declared (if that counts), else 0.
 func lie_amount(seat: int) -> int:
@@ -197,7 +211,7 @@ func resolve_audit(report: bool) -> void:
 	if caught:
 		if lie > 0:
 			_pay(target, TO_POT, lie)  # the hidden coins go back to the table
-		var fine := absi(lie) * rules.fine_multiplier
+		var fine := fine_for(lie)
 		var share_each := 0
 		if not vouchers.is_empty():
 			# Vouchers share half the fine; the liar pays the rest.
@@ -269,8 +283,25 @@ func accessory_value(seat: int) -> int:
 	return total
 
 
+## What the IOUs add to (owed to `seat`) or take from (owed by it) its wealth.
+func iou_balance(seat: int) -> int:
+	return balance_of(ious, seat)
+
+
+## iou_balance over a list of IOUs, e.g. the one in a player's view.
+static func balance_of(iou_list: Array, seat: int) -> int:
+	var balance := 0
+	for iou: Dictionary in iou_list:
+		if iou["to"] == seat:
+			balance += int(iou["amount"])
+		if iou["from"] == seat:
+			balance -= int(iou["amount"])
+	return balance
+
+
+## Cash plus accessories at their end value, with IOUs settled. Can go negative.
 func wealth(seat: int) -> int:
-	return cash[seat] + accessory_value(seat)
+	return cash[seat] + accessory_value(seat) + iou_balance(seat)
 
 
 ## Seats from first to last: richest first, then whoever put more into the table.
@@ -347,6 +378,7 @@ func view_for(seat: int) -> Dictionary:
 		"accessories": accessories.duplicate(true),
 		"total_contributed": total_contributed.duplicate(),
 		"history": history.duplicate(true),
+		"ious": ious.duplicate(true),
 		"my_income": incomes[seat],
 		"my_declaration": declarations[seat],
 		"my_cash": cash[seat],
@@ -367,7 +399,8 @@ func reveal() -> Array[Dictionary]:
 
 
 ## Pays from cash first, then by selling accessories at their price, cheapest first,
-## with any change back to cash. Whatever is still missing joins the common debt.
+## with any change back to cash. Whatever is still missing joins the common debt, or,
+## owed to a player under rules.unpaid_becomes_iou, becomes an IOU.
 func _pay(from: int, to: int, amount: int) -> void:
 	var paid := mini(amount, cash[from])
 	cash[from] -= paid
@@ -384,7 +417,10 @@ func _pay(from: int, to: int, amount: int) -> void:
 		pot += paid
 	else:
 		cash[to] += paid
-	_unpaid += owed
+	if owed > 0 and to != TO_POT and rules.unpaid_becomes_iou:
+		ious.append({"from": from, "to": to, "amount": owed, "round": round_index})
+	else:
+		_unpaid += owed
 
 
 ## Straight from the income just dealt, before anyone can pass coins under the table:

@@ -10,7 +10,7 @@
 
 | # | Taş | "Bitti" kriteri | Kim |
 |---|---|---|---|
-| **M0** | Kağıt prototip | En az 3 test oturumu yapıldı, notlar `docs/playtests/` altında. Oyuncular kendiliğinden "bir maç daha" diyor. Kurallar playtest'lere göre güncellendi (v0.3). | Tüm ekip |
+| **M0** | Kağıt prototip | En az 3 test oturumu yapıldı, notlar `docs/playtests/` altında. Oyuncular kendiliğinden "bir maç daha" diyor. Kurallar playtest'lere göre güncellendi. | Tüm ekip |
 | **M1** | Teknik spike | ADR-0001'deki 5 kriter 4 ayrı Windows makinede çalıştı, ADR kabul edildi. | Kerem Ataç + Claude |
 | **M2** | Online gri kutu | Tam kural döngüsü online oynanıyor. Maymunlar kutu, sanat yok. Kural motorunun testleri ve simülasyonu var. Ekip haftada en az bir kez kendi oyununu oynuyor. | Kerem Ataç + Claude, testlerde herkes |
 | **M3** | Sanat yönü + vertical slice | Maymun modeli (sipariş veya kendimiz), oda, Hesap Günü ekranı hazır. **Steam sayfası açıldı** (Steam Direct ücreti 100 $), kapsül görseli sipariş edildi. | Ekip + dışarıdan sanatçı |
