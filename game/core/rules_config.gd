@@ -57,5 +57,8 @@ extends Resource
 @export var placement_points := PackedInt32Array([5, 3, 2, 1])
 ## 4 in v0.3: with rotate_first_auditor everyone audits first once a night.
 @export var matches_per_night: int = 3
+## How many matches at the start of a night use the basic rules (MatchState.basic), so
+## new players learn the core first. The lobby can turn it off for those who know the game.
+@export var basic_matches: int = 0
 ## On in v0.3: each new match of a night, the first auditor moves one seat on.
 @export var rotate_first_auditor: bool = false

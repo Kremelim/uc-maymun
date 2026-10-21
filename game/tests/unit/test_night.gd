@@ -7,6 +7,13 @@ const KINDS := ["açgözlü", "dürüst", "kinci", "bedavacı"]
 const NIGHT_SEED := 4242
 
 
+## v0.3 without the basic first match, for tests about the full rules.
+func _full_rules() -> RulesConfig:
+	var rules: RulesConfig = RULES.duplicate()
+	rules.basic_matches = 0
+	return rules
+
+
 func _bots(kinds: Array = KINDS) -> Array[SeatBot]:
 	var bots: Array[SeatBot] = []
 	for seat in kinds.size():
@@ -54,7 +61,7 @@ func test_bots_online_replay_the_simulator() -> void:
 		for kind: String in KINDS:
 			sim_bots.append(SimBot.preset(kind))
 		var expected := MatchRunner.play(RULES, sim_bots, Night.match_seed_of(NIGHT_SEED, index),
-			MatchState.first_auditor_of(RULES, index, 4))
+			MatchState.first_auditor_of(RULES, index, 4), Night.is_basic(RULES, index))
 		assert_eq(results[index]["points"], expected["points"], "match %d points" % index)
 		assert_eq(results[index]["wealth"], expected["wealth"], "match %d wealth" % index)
 		for seat in 4:
@@ -68,6 +75,21 @@ func test_first_auditor_moves_on_each_match() -> void:
 	for index in 3:
 		assert_eq(night.current_match.auditor(), index, "match %d starts with seat %d auditing" % [index, index])
 		_play(night, bots, func() -> bool: return night.match_index > index)
+
+
+func test_the_first_match_teaches_the_basic_rules() -> void:
+	var night := Night.new(RULES, 4, NIGHT_SEED)
+	var bots := _bots()
+	assert_eq(night.view_for(0)["basic"], true, "match 1 is basic")
+	var shops: Array = []
+	_play(night, bots, func() -> bool:
+		if night.current_match.phase == MatchState.Phase.SHOP:
+			shops.append([night.match_index, night.current_match.round_index])
+		return night.match_index == 1 and night.current_match.phase == MatchState.Phase.NEGOTIATE)
+	assert_eq(shops.filter(func(s: Array) -> bool: return s[0] == 0), [], "no shop in the basic match")
+	assert_eq(night.view_for(0)["basic"], false, "match 2 has the full rules")
+	var auditor := night.current_match.auditor()
+	assert_true(night.apply((auditor + 1) % 4, {"type": "vouch", "target": (auditor + 2) % 4}), "vouching is back")
 
 
 func test_negotiation_ends_when_everyone_is_ready_or_time_runs_out() -> void:
@@ -103,7 +125,7 @@ func test_intents_are_checked() -> void:
 
 
 func test_views_keep_secrets() -> void:
-	var night := Night.new(RULES, 4, NIGHT_SEED)
+	var night := Night.new(_full_rules(), 4, NIGHT_SEED)
 	var bots := _bots()
 	_play(night, bots, _in_phase(night, MatchState.Phase.NEGOTIATE))
 	var giver := 0
@@ -126,7 +148,7 @@ func test_views_keep_secrets() -> void:
 
 
 func test_last_round_skips_the_closed_shop() -> void:
-	var night := Night.new(RULES, 4, NIGHT_SEED)
+	var night := Night.new(_full_rules(), 4, NIGHT_SEED)
 	var bots := _bots()
 	var shops: Array = []
 	_play(night, bots, func() -> bool:

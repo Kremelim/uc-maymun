@@ -212,14 +212,14 @@ func _check_reports() -> void:
 
 ## What the simulator says each match of this night ends like, with these bots in these seats.
 func _simulated(kinds: Array) -> Array:
-	var rules := Session.RULES
+	var rules := Session.host_night().rules  # with or without the basic first match
 	var expected: Array = []
 	for index in rules.matches_per_night:
 		var bots: Array[SimBot] = []
 		for kind: String in kinds:
 			bots.append(SimBot.preset(kind))
 		var result := MatchRunner.play(rules, bots, Night.match_seed_of(_night_seed, index),
-			MatchState.first_auditor_of(rules, index, kinds.size()))
+			MatchState.first_auditor_of(rules, index, kinds.size()), Night.is_basic(rules, index))
 		expected.append({"points": result["points"], "wealth": result["wealth"]})
 	return expected
 

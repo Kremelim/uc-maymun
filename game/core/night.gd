@@ -42,6 +42,11 @@ func _init(p_rules: RulesConfig, p_seat_count: int, p_night_seed: int, now_msec:
 	_advance()
 
 
+## Whether match `index` of a night is played with the basic rules.
+static func is_basic(p_rules: RulesConfig, index: int) -> bool:
+	return index < p_rules.basic_matches
+
+
 ## The seed of match `index` of a night. Only the host may know it: with the seed,
 ## anyone could deal the cards again and read every income.
 static func match_seed_of(p_night_seed: int, index: int) -> int:
@@ -159,8 +164,9 @@ func view_for(seat: int) -> Dictionary:
 func _start_match(index: int) -> void:
 	match_index = index
 	var first := MatchState.first_auditor_of(rules, index, seat_count)
-	current_match = MatchState.new(rules, seat_count, match_seed_of(night_seed, index), first)
-	_event({"type": "match_started", "match": index})
+	var basic := is_basic(rules, index)
+	current_match = MatchState.new(rules, seat_count, match_seed_of(night_seed, index), first, basic)
+	_event({"type": "match_started", "match": index, "basic": basic})
 	_start_round()
 
 
@@ -189,7 +195,7 @@ func _advance() -> void:
 			_on_enter(m.phase)
 		if m.phase == MatchState.Phase.NEGOTIATE and (_all_ready() or _now_msec >= _deadline_msec):
 			m.end_negotiation()
-		elif m.phase == MatchState.Phase.SHOP and (_all_ready() or (m.is_last_round() and not rules.last_round_shop)):
+		elif m.phase == MatchState.Phase.SHOP and (_all_ready() or not m.shop_open()):
 			m.end_round()
 			if not m.is_over():
 				_start_round()
@@ -211,7 +217,7 @@ func _on_enter(phase: int) -> void:
 			_deadline_msec = _now_msec + rules.negotiation_seconds * 1000
 			_event({"type": "declarations_revealed", "missing": m.missing()})
 		MatchState.Phase.AUDIT_CHOOSE:
-			_event({"type": "contributions_revealed", "pot": m.pot})
+			_event({"type": "contributions_revealed", "pot": m.pot, "due": m.installment_due()})
 		MatchState.Phase.MATCH_OVER:
 			var points := m.points()
 			for seat in seat_count:

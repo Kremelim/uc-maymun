@@ -44,8 +44,8 @@ func intents(view: Dictionary) -> Array[Dictionary]:
 			if view["my_declaration"] == NONE:
 				result.append({"type": "declare", "amount": bot.declare(view)})
 		MatchState.Phase.NEGOTIATE:
-			var target := bot.vouch_target(view)
-			if target != NONE:
+			var target := bot.vouch_target(view)  # asked even in basic matches, as MatchRunner does
+			if target != NONE and not view["basic"]:
 				result.append({"type": "vouch", "target": target})
 			result.append({"type": "ready"})
 		MatchState.Phase.CONTRIBUTE:
