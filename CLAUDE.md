@@ -29,6 +29,8 @@
   Boş koltuklara ve çıkanların yerine bot (`sim/seat_bot.gd`). Mimari: `docs/adr/0002-online-mac-mimarisi.md`, kullanım: `docs/m2-gri-kutu.md`.
   İlk denemede (Kerem, botlarla) oyun anlaşılmadı. Anlaşılırlık turu yapıldı: nasıl oynanır ekranı, eylem kartı, büyük duyurular,
   masada jeton ve beyan kartları, temel kurallarla ilk maç. Görünüş (karakter, ortam) M3'te. Ekip testi bekliyor.
+- M3 planı (taslak, kararlar ekipte): `docs/m3-plan.md`. Önerilen yön: stilize karikatür, gazino arka odası, orta bütçe, karakter siparişi.
+  Ücretli varlıklar repoya girerse repo özel kalmalı (lisanslar dağıtımı yasaklıyor).
 - Kurallar v0.3 (2026-10-21, Kerem Ataç kabul etti): v0.2 (denetçinin kartı açık, asgari katkı beyanın %60'ı ve beyanlar açılınca ödenir,
   son tur dükkanı kapalı, fazla beyan da yalan, en az 3 oyuncu) + ödenemeyen ceza senet olur + gece 4 maç, ilk denetçi her maç kayar.
   Açık sorular ve Kerem Gönç'ün kararını bekleyenler: `docs/sim/bulgular-v0.3.md`. Kağıt prototip henüz oynanmadı.

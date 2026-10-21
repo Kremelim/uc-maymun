@@ -15,6 +15,7 @@ Dört maymun, tek masa, ortak bir borç: borcu birlikte ödeyin, cebe en çok pa
 - [M1 teknik spike](docs/spike-m1.md)
 - [M2 online gri kutu: nasıl oynanır](docs/m2-gri-kutu.md)
 - [ADR-0002: Online maç mimarisi](docs/adr/0002-online-mac-mimarisi.md)
+- [M3 planı: sanat yönü ve dikey dilim](docs/m3-plan.md)
 - [Playtest şablonu](docs/playtests/_sablon.md)
 - [Ekip sözleşmesi kontrol listesi](docs/ekip-sozlesmesi.md)
 
