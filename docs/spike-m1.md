@@ -1,5 +1,7 @@
 # M1 — Teknik spike
 
+> Masa artık tam kurallarla oynanıyor (M2): [m2-gri-kutu.md](m2-gri-kutu.md). Aşağıdaki kurulum ve Steam/ses adımları hâlâ geçerli.
+
 > Amaç: [ADR-0001](adr/0001-oyun-motoru.md)'deki 5 kriteri Godot 4.7.2 ile doğrulamak.
 > Son güncelleme: 2026-10-20
 
@@ -47,7 +49,7 @@ Ne var:
    - 4: `-- --auto-join --win=3 --name=Ulas`
 5. **OK**, sonra **F5** (Run Project). 4 pencere ekranı 2×2 bölerek açılır. Dördü bağlanınca oyun kendiliğinden başlar.
 6. Her pencerede farklı bir gelir görmelisin. Bir sayı seçip **Beyan et**'e bas. Dördü de beyan edince
-   "KAYIP JETON" görünür. Yeni tur için ilk penceredeki **Yeni tur dağıt (host)** düğmesini kullan.
+   "KAYIP JETON" görünür. Oyunun devamı (pazarlık, katkı, denetim…): [m2-gri-kutu.md](m2-gri-kutu.md).
 
 İlk seferde Windows Güvenlik Duvarı izin isteyebilir; **Özel ağlar** için izin ver.
 
@@ -208,9 +210,8 @@ Bana gönder: duyup duymadığınız, gecikme ve ses kalitesi hakkında izlenimi
 - **2 kişide gizli bilgi kalmıyor.** Masaya dağıtılan toplam bilindiği için 2 kişide herkes diğerinin gelirini hesaplayabiliyor.
   Spike'ta test kolaylığı için 2 kişiyle başlanabiliyor; oyunun gerçek alt sınırı 3 (`docs/gdd/kurallar-v0.3.md`).
 - Ses sadece Steam'le çalışıyor; yerel ağ modunda gerçek mikrofon yok (sadece `--fake-voice` test tonu). Bas-konuş (push-to-talk), fısıltı ve oyuncu başına sessize alma M2'de.
-- Bir oyuncu oyun sırasında ayrılırsa maç biter ve herkes lobiye döner. Bot devralması ya da duraklatma M2'de.
+- ~~Bir oyuncu oyun sırasında ayrılırsa maç biter.~~ M2'de yerine bot geçiyor.
 - Arayüz metinleri kodda Türkçe yazılı. Çeviri sistemi (TR/EN) M2'de.
 - Host her şeyi bilir; arkadaşlar arasında kabul edilebilir. Açık lobiler için yeniden değerlendirilecek.
-- Kurallardan sadece gelir ve beyan var. Katkı, denetim, rüşvet ve kefil M2'de, kağıt prototipten sonra.
-- **Fazla beyan serbest** (aldığından fazlasını beyan etmek). İlk 4 pencereli denemede hemen yaşandı.
-  Kurallarda açık bir uç durum; Kerem Gönç karar verene kadar oyun buna izin veriyor ve "BEYAN FAZLASI" diye gösteriyor.
+- ~~Kurallardan sadece gelir ve beyan var.~~ M2'de kuralların tamamı var.
+- ~~Fazla beyan serbest.~~ Kurallar v0.2'den beri fazla beyan da yalan sayılıyor.

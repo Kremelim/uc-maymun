@@ -3,7 +3,7 @@
 Dört maymun, tek masa, ortak bir borç: borcu birlikte ödeyin, cebe en çok parayı siz atın.
 4 oyunculu online sosyal blöf oyunu, PC / Steam.
 
-**Durum:** Konsept + kağıt prototip aşaması.
+**Durum:** Kağıt prototip ve online gri kutu (M2) aşaması.
 
 ## Dokümanlar
 
@@ -13,6 +13,8 @@ Dört maymun, tek masa, ortak bir borç: borcu birlikte ödeyin, cebe en çok pa
 - [Simülasyon bulguları](docs/sim/bulgular-v0.3.md)
 - [ADR-0001: Oyun motoru](docs/adr/0001-oyun-motoru.md)
 - [M1 teknik spike](docs/spike-m1.md)
+- [M2 online gri kutu: nasıl oynanır](docs/m2-gri-kutu.md)
+- [ADR-0002: Online maç mimarisi](docs/adr/0002-online-mac-mimarisi.md)
 - [Playtest şablonu](docs/playtests/_sablon.md)
 - [Ekip sözleşmesi kontrol listesi](docs/ekip-sozlesmesi.md)
 

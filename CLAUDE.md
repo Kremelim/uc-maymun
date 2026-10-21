@@ -25,7 +25,9 @@
   Bölüm B: Steam lobisi iki ayrı evden 2 kişiyle doğrulandı (B1, B2). Steam daveti/overlay kendi App ID'mize kadar ertelendi.
   B3 (ses, `net/voice_chat.gd`): kod hazır, Windows'ta test bekliyor. Bkz. `docs/spike-m1.md`.
 - Kural motoru (`core/match_state.gd`) ve simülatör (`sim/`) hazır. Oyun `data/rules_v0_3.tres` kullanır.
-  Online oyun (`net/session.gd`) şimdilik spike: sadece gelir ve beyan; tam kural döngüsü M2'de bağlanacak.
+- M2 online gri kutu: kuralların tamamı online (`core/night.gd` gece akışı, `net/session.gd` host, `features/table/` arayüz).
+  Boş koltuklara ve çıkanların yerine bot (`sim/seat_bot.gd`). Mimari: `docs/adr/0002-online-mac-mimarisi.md`, kullanım: `docs/m2-gri-kutu.md`.
+  Ekip testi bekliyor.
 - Kurallar v0.3 (2026-10-21, Kerem Ataç kabul etti): v0.2 (denetçinin kartı açık, asgari katkı beyanın %60'ı ve beyanlar açılınca ödenir,
   son tur dükkanı kapalı, fazla beyan da yalan, en az 3 oyuncu) + ödenemeyen ceza senet olur + gece 4 maç, ilk denetçi her maç kayar.
   Açık sorular ve Kerem Gönç'ün kararını bekleyenler: `docs/sim/bulgular-v0.3.md`. Kağıt prototip henüz oynanmadı.
@@ -46,13 +48,15 @@
     `godot --headless --path game --script res://tests/lint_warnings.gd`
   - Unit testler: `godot --headless --path game --script res://tests/run_unit_tests.gd`
     (autoload'lar yüklendikten sonra çalışır; test sırasında motor hatası olursa test başarısız sayılır)
-  - E2E (1 host + 3 istemci, gerçek ENet, `--fake-voice` ile ses aktarımı dahil): `GODOT=godot game/tests/e2e/run_e2e.sh`
+  - E2E (host + 2 istemci + 1 bot gerçek ENet üzerinden bir gece oynar; sonuç simülatörle birebir aynı olmalı; `--fake-voice` ile ses dahil):
+    `GODOT=godot game/tests/e2e/run_e2e.sh`. Gece ortasında çıkan oyuncu senaryosu: `LEAVER=1` ile.
     (loglarda motor hatası ya da sızıntı uyarısı varsa, testler geçse bile başarısız sayılır)
   - Simülatör (botlarla deneyler, Markdown rapor yazar; 2000 maçlık tam rapor ~2,5 dakika sürer, seed sabit olduğu için her seferinde aynı çıkar):
     `godot --headless --path game --script res://sim/simulate.gd -- --matches=2000 --out=$(pwd)/docs/sim/sonuclar-v0.3.md`
     Kural sürümü değişince: yeni `data/rules_vX.tres`, `simulate.gd`'de `RULES` ve deneyler, yeni `sonuclar-`/`bulgular-` dosyaları.
     Eski raporlar, onları üreten commit not edilerek kalır.
-  - Görsel kontrol (masayı Xvfb altında çizip PNG kaydeder): kullanımı `game/tests/visual/render_table.gd` başında. Arayüz değiştiğinde çalıştırıp görüntüye bak.
+  - Görsel kontrol (botlar bir geceyi istenen aşamaya kadar oynar, masa Xvfb altında çizilip PNG kaydedilir): kullanımı
+    `game/tests/visual/render_table.gd` başında. Arayüz değiştiğinde birkaç aşamayı (`STATE=`) çizip görüntülere bak.
 - CI (`.github/workflows/ci.yml`) her PR'da import, uyarı kontrolü, unit, kısa bir simülatör çalıştırması ve E2E çalıştırır.
 - Sahne düğümü uyarıları (ör. autowrap'li Label'a minimum genişlik) bu kontrole girmez; .tscn yazarken dikkat.
 
