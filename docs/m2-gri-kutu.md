@@ -11,7 +11,7 @@ Kurallar v0.3'ün tamamı online oynanıyor:
 - dükkan, senet;
 - Hesap Günü ve 4 maçlık gece.
 
-Maymunlar hâlâ gri kutu; sanat yok. Boş koltuklara bot oturuyor. Oyun sırasında biri çıkarsa yerine bot geçiyor.
+Maymunlar ücretsiz bir test modeli (M3a); gerçek karakterler ve oda M3'te. Boş koltuklara bot oturuyor. Oyun sırasında biri çıkarsa yerine bot geçiyor.
 
 **Anlaşılırlık turu (ilk denemeden sonra):**
 
@@ -70,8 +70,13 @@ M1 B2'deki gibi:
 - **Masa:**
   - kasadaki jetonlar ve "Kasa 8 / 12";
   - her oyuncunun önünde beyan kartı (herkes beyan edene kadar kapalı);
-  - alınan aksesuarlar küçük şekiller olarak (M3'te maymunların üstüne geçecek).
-- **Maymunların üstü:** sadece ad ve tek işaret. "…" bekleniyor, "✓" hazır, sarı şapka denetçi. Pazarlıkta kimin kime kefil olduğu da burada.
+  - senin aldığın aksesuarlar önünde, küçük şekiller olarak (kendi maymununu görmüyorsun).
+- **Maymunlar:**
+  - Aldıkları aksesuarları takıyorlar.
+  - Denetçinin başında yeşil siperlik var.
+  - Konuşanın ağzı açılıyor.
+  - Yakalanınca, temiz çıkınca, taksit eksik kalınca ve maç bitince tepki veriyorlar.
+- **Maymunların üstü:** sadece ad ve tek işaret. "…" bekleniyor, "✓" hazır. Konuşanın adı sarı. Pazarlıkta kimin kime kefil olduğu da burada.
 - **Orta alt (eylem kartı):** aşamanın adı, tek kısa cümle ve düğmeler. Sıra sendeyse kenarı parlar. Kartın köşesindeki **?** o aşamanın kuralını açar.
 - **Sol alt:** gelirin, cebin, puanın (ve varsa senedin).
 
@@ -120,4 +125,4 @@ Testler:
 - Botlar konuşmuyor, pazarlık etmiyor, rüşvet vermiyor ya da almıyor; masa altından gelen jetonu da karşılıksız bırakıyor.
 - 3 kişilik sayılar tasarlanmadı. Botlar kapalıyken 3 kişiyle oynanabiliyor ama denge 4 kişiye göre.
 - Arayüz metinleri kodda Türkçe; çeviri sistemi yok.
-- Maymun animasyonu, oda, ses efektleri ve Hesap Günü sahnesi M3'te.
+- Gerçek maymun karakterleri, oda, ses efektleri ve Hesap Günü sahnesi M3'te.

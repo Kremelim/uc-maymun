@@ -41,6 +41,9 @@ extends Resource
 
 @export_group("Shop")
 @export var accessory_names := PackedStringArray()
+## The same accessories by a fixed English key: the model shows accessory "glasses" with
+## its acc_glasses node (docs/sanatci-sartnamesi.md). Not shown to players.
+@export var accessory_keys := PackedStringArray()
 @export var accessory_prices := PackedInt32Array()
 ## What each accessory is worth at the end: a status bonus over its price.
 @export var accessory_values := PackedInt32Array()

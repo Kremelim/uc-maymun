@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://features/monkey/monkey.gd" id="1_monkey"]
+
+[node name="Monkey" type="Node3D"]
+script = ExtResource("1_monkey")
+
+[node name="VoicePlayer" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+unit_size = 3.0
+
+[node name="Label3D" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+pixel_size = 0.0022
+billboard = 1
+fixed_size = true
+text = "Maymun"
+font_size = 22
+outline_size = 10
+vertical_alignment = 2
+autowrap_mode = 3
+width = 320.0

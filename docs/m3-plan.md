@@ -189,7 +189,7 @@ Kabaca; kesin fiyat sanatçı tekliflerinden sonra belli olur.
 
 | Adım | İçerik | Para |
 |---|---|---|
-| **M3a** | Referans panosu → görsel yön kararı (ADR-0003). Sanatçı şartnamesi. Teknik hazırlık (aşağıda). Ücretsiz bir maymun modeliyle deneme. | Yok |
+| **M3a** | Referans panosu → görsel yön kararı (ADR-0004). Sanatçı şartnamesi. Teknik hazırlık (aşağıda). Ücretsiz bir maymun modeliyle deneme. | Yok |
 | **M2 ekip testi** | En az bir gece oynanır. Devam / değiştir / bırak kararı. | Yok |
 | **M3b** | Karakter (sipariş ya da paket). Tek maymun oyunda: ağız, aksesuarlar, birkaç animasyon. | Var |
 | **M3c** | Oda ve ışık, masa üstü nesneleri. | Var |
@@ -198,25 +198,37 @@ Kabaca; kesin fiyat sanatçı tekliflerinden sonra belli olur.
 
 **Bitti kriteri:** Ekip dikey dilimi oynar ve "bunu Steam'de görsem tıklarım" der. Steam sayfası açık.
 
-## 8. Teknik hazırlık (M3a, para gerektirmez)
+## 8. Teknik hazırlık (M3a, para gerektirmez): bitti
 
-1. **Maymun arayüzü:** Oyunun bir maymuna söyleyebileceği her şey tek bir arayüzde toplanır:
-   - "konuşuyor (şu seviyede)";
-   - "şu aksesuarları taksın";
-   - "denetçi";
-   - "şu tepkiyi göster".
+Kararı ve gerekçesi: [ADR-0003](adr/0003-maymun-modeli-sozlesmesi.md). Sanatçıya giden kurallar: [sanatçı şartnamesi](sanatci-sartnamesi.md) ([İngilizcesi](artist-spec.en.md)).
 
-   Bugünkü kapsül de bu arayüzü kullanır. Model gelince sadece sahne değişir; oyun kodu değişmez.
-2. **Aksesuar takma:** Sert aksesuarlar (gözlük, saat, zincir, taç) kemiklere takılır (Godot'da `BoneAttachment3D`). Şimdilik masadaki küçük şekiller.
-   - Eldivenler aynı iskeletle bükülen ayrı modeller olur.
-   - Dört maymunda kemik isimleri aynı olursa tek bir aksesuar sahnesi hepsine uyar.
-3. **Konuşan ağız:** Blender'daki "shape key", glTF ile Godot'a blend shape olarak gelir. `voice_chat.gd` zaten her konuşanın ses seviyesini ölçüyor. Bu değer yumuşatılıp her karede "jaw_open" blend shape'ine verilir; bugünkü kapsüldeki ağız da aynı mantıkla çalışıyor.
-4. **Karikatür görünüm:** Godot 4.7 malzemelerinde "toon" ışıklandırma ve kontur çizgisi (stencil outline) hazır. Stil A için ek eklenti gerekmiyor. [BaseMaterial3D](https://docs.godotengine.org/en/stable/classes/class_basematerial3d.html)
-5. **Sanatçı şartnamesi** (ayrı belge): dosya formatı (glTF/GLB), ölçek ve eksenler, poligon bütçesi, iskelet ve kemik isimleri, ağız/göz blend shape isimleri, doku boyutları, teslim edilecek animasyonlar. Sipariş verirken sanatçıya verilecek.
-6. **Ücretsiz deneme modeli:** OpenGameArt'taki CC0 maymunla (ya da Quaternius'un ücretsiz insansı modeliyle) bütün zinciri deneriz:
-   - içe aktarma (glTF/GLB);
-   - Mixamo/Quaternius animasyonunun aktarılması;
-   - ağız;
-   - aksesuar.
+1. **Maymun arayüzü:** Masa maymunla tek bir sınıf üzerinden konuşuyor (`features/monkey/monkey.gd`):
+   - ad ve durum;
+   - denetçi şapkası;
+   - aksesuarlar;
+   - ses ve ağız;
+   - tepkiler (yakalandı, sevinç, hayal kırıklığı).
 
-   Para harcamadan önce teknik sürpriz kalmaz.
+   Hangi koltukta hangi model olduğu `assets/monkeys/cast.tres`'te. Yeni maymun gelince kod değişmez.
+2. **Aksesuarlar:** Modelin içinde, `acc_glasses` gibi adlarla.
+   - Sert olanlar kemiğe bağlı; Godot'da `BoneAttachment3D` olarak geliyor. Eldivenler iskelete bağlı (skinned).
+   - Oyun görünürlüğü açıp kapıyor. Kendi aksesuarların masada, önünde duruyor (kendi maymununu görmüyorsun).
+3. **Konuşan ağız ve göz kırpma:** `jaw_open` ve `blink` blend shape'leri.
+   - Ağız ses seviyesini izliyor.
+   - 0,25 saniyeden uzun konuşmada maymun `talk` animasyonuna geçiyor, susunca beklemeye dönüyor.
+4. **Karikatür görünüm:** Toon ışık ve stencil kontur koddan ekleniyor (`cast.tres` → Toon). Aynı model koltuklara göre farklı kürk rengi alabiliyor.
+5. **Sanatçı şartnamesi:** Hazır.
+   - Biçim, ölçek, poligon ve doku bütçesi.
+   - Kemik ve blend shape adları, aksesuar ve şapka nesneleri.
+   - Animasyon listesi, oturma ölçüleri, dışa aktarma ayarları, haklar.
+6. **Ücretsiz test maymunu:** Hazır ve masada.
+   - OpenGameArt'taki model şartnameye uymadığı için Blender betiğiyle üretildi (`tools/blender/make_test_monkey.py`, Suzanne başı, CC0).
+   - Bütün zincir onunla sınandı: Blender → glTF → Godot, iskelet, ağız, göz, aksesuar, 5 animasyon.
+7. **Teslim kontrolü:**
+   - `tools/check_monkey_model.gd` bir modeli şartnameye göre denetliyor. Testler de oyundaki bütün modelleri denetliyor.
+   - Editörde `features/monkey/monkey_preview.tscn` (F6) modeli tuşlarla oynatıyor.
+
+**Kalan (ekipte):**
+- Referans panosu ve görsel yön kararı (ADR-0004).
+- Şartnamenin Kerem Gönç'le gözden geçirilmesi: özellikle denetçi şapkasının tasarımı ve animasyon listesi.
+- Mixamo ya da Quaternius animasyonlarının test maymununa aktarılması. İskelet adları uyumlu; denemesi M3b'de, gerçek modelle.

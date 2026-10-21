@@ -16,6 +16,8 @@ Dört maymun, tek masa, ortak bir borç: borcu birlikte ödeyin, cebe en çok pa
 - [M2 online gri kutu: nasıl oynanır](docs/m2-gri-kutu.md)
 - [ADR-0002: Online maç mimarisi](docs/adr/0002-online-mac-mimarisi.md)
 - [M3 planı: sanat yönü ve dikey dilim](docs/m3-plan.md)
+- [Sanatçı şartnamesi: maymun modeli](docs/sanatci-sartnamesi.md) ([English](docs/artist-spec.en.md))
+- [ADR-0003: Maymun modeli sözleşmesi](docs/adr/0003-maymun-modeli-sozlesmesi.md)
 - [Playtest şablonu](docs/playtests/_sablon.md)
 - [Ekip sözleşmesi kontrol listesi](docs/ekip-sozlesmesi.md)
 

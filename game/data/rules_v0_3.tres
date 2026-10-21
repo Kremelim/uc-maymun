@@ -9,6 +9,7 @@ auditor_card_open = true
 unpaid_becomes_iou = true
 min_contribution_ratio = 0.6
 accessory_names = PackedStringArray("Gözlük", "Eldiven", "Saat", "Altın zincir", "Taç")
+accessory_keys = PackedStringArray("glasses", "gloves", "watch", "chain", "crown")
 accessory_prices = PackedInt32Array(4, 6, 8, 12, 20)
 accessory_values = PackedInt32Array(5, 7, 10, 15, 25)
 last_round_shop = false
