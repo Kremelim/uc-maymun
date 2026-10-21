@@ -25,6 +25,7 @@ M0 ve M1 birbirinden bağımsız, aynı anda yürür.
 - M2'nin ilk sürümü hazır: kuralların tamamı online ve botlarla oynanıyor ([m2-gri-kutu.md](m2-gri-kutu.md)).
 - M2'nin "bitti" kriteri için ekibin düzenli olarak oynaması gerekiyor.
 - Online gri kutu, kağıt prototipin yerine de kullanılabilir: ayrı evlerden oynanabiliyor.
+- M3 planı taslak hâlinde: [m3-plan.md](m3-plan.md). Para gerektirmeyen kısmı (görsel yön, sanatçı şartnamesi, teknik hazırlık) hemen başlayabilir. Para harcanan kısım M2 ekip testinden sonra.
 
 ## Çalışma ritmi
 
