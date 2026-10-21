@@ -62,9 +62,19 @@ static func preset(preset_kind: String) -> SimBot:
 	return bot
 
 
+## Gets the bot ready for a new match: the rules, its own seeded randomness and a clean slate.
+func prepare(p_rules: RulesConfig, match_seed: int, seat: int) -> void:
+	rules = p_rules
+	rng.seed = hash([match_seed, seat])
+	sank_the_table = false
+
+
 func declare(view: Dictionary) -> int:
-	var ratio := hide_ratio_as_auditor if view["auditor"] == view["seat"] else hide_ratio
 	var income: int = view["my_income"]
+	var auditing: bool = view["auditor"] == view["seat"]
+	if auditing and rules.auditor_card_open:
+		return income  # everyone sees the card
+	var ratio := hide_ratio_as_auditor if auditing else hide_ratio
 	return income - roundi(income * ratio)
 
 

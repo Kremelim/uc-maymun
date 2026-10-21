@@ -137,8 +137,10 @@ func _to_host(packet: PackedByteArray) -> void:
 ## Host only: sends a speaker's packet to everyone except the speaker, and plays it here.
 func _relay(speaker: int, packet: PackedByteArray) -> void:
 	var me := multiplayer.get_unique_id()
+	var connected := multiplayer.get_peers()
 	for peer_id: int in Network.roster:
-		if peer_id != speaker and peer_id != me:
+		# Someone who just left stays in the roster until the end of the frame.
+		if peer_id != speaker and peer_id != me and peer_id in connected:
 			_from_host.rpc_id(peer_id, speaker, packet)
 	if speaker != me:
 		_play(speaker, packet)

@@ -11,8 +11,7 @@ const CLOSE_MARGIN := 2
 static func play(rules: RulesConfig, bots: Array[SimBot], match_seed: int, first_auditor: int = 0) -> Dictionary:
 	var state := MatchState.new(rules, bots.size(), match_seed, first_auditor)
 	for i in bots.size():
-		bots[i].rules = rules
-		bots[i].rng.seed = hash([match_seed, i])
+		bots[i].prepare(rules, match_seed, i)
 	var lies := _zeros(bots.size())
 	var caught := _zeros(bots.size())
 	var covered := _zeros(bots.size())

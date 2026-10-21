@@ -13,6 +13,8 @@ const MAX_NAME_LENGTH := 16
 ## peer_id -> {"name": String, "seat": int}. The host syncs it, so it is identical on every peer.
 var roster: Dictionary = {}
 var game_in_progress := false
+## Host's choice in the lobby: bots take the empty seats when the game starts.
+var fill_with_bots := true
 ## Shown by the lobby after being sent back there (e.g. "the host left").
 var last_message := ""
 ## --auto-host / --auto-join run once per launch, not every time the lobby reloads.
@@ -84,9 +86,19 @@ func join_steam_lobby(lobby_id: int, player_name: String) -> void:
 	SteamService.join_lobby(lobby_id)
 
 
-## Host only. Seats are packed to 0..n-1 first so the rules engine sees contiguous seats.
+## How many bots would sit down if the game started now.
+func bot_count() -> int:
+	return Session.RULES.max_players - roster.size() if fill_with_bots else 0
+
+
+func can_start() -> bool:
+	return _is_host and not game_in_progress and roster.size() + bot_count() >= Session.RULES.min_players
+
+
+## Host only. Seats are packed to 0..n-1 first so the rules engine sees contiguous seats;
+## bots sit after the people.
 func start_game() -> void:
-	if not _is_host or game_in_progress or roster.size() < Session.RULES.spike_min_players:
+	if not can_start():
 		return
 	game_in_progress = true
 	SteamService.set_lobby_joinable(false)
@@ -96,7 +108,20 @@ func start_game() -> void:
 		roster[peers[i]]["seat"] = i
 	_sync_roster.rpc(roster)
 	_start_game.rpc()
-	Session.host_begin(roster, int(CmdArgs.value("--seed", "-1")))
+	var night_seed := int(CmdArgs.value("--seed", "-1"))
+	var kinds_rng := RandomNumberGenerator.new()
+	kinds_rng.seed = night_seed if night_seed >= 0 else randi()
+	var bot_kinds := Session.pick_bot_kinds(bot_count(), kinds_rng)
+	var forced := CmdArgs.value("--bot-kinds").split(",", false)  # e.g. --bot-kinds=kinci,dürüst
+	for i in mini(forced.size(), bot_kinds.size()):
+		bot_kinds[i] = forced[i]
+	Session.host_begin(roster, bot_kinds, night_seed)
+
+
+## Host only: everyone goes back to the lobby together, still connected.
+func end_game(message: String) -> void:
+	if _is_host and game_in_progress:
+		_abort_game.rpc(message)
 
 
 ## Leaves the table (or stops hosting) and goes back to the lobby.
@@ -168,12 +193,11 @@ func _on_peer_disconnected(peer_id: int) -> void:
 func _handle_peer_left(peer_id: int) -> void:
 	if not _is_host or not roster.has(peer_id):
 		return
-	var who: String = roster[peer_id]["name"]
+	var seat: int = roster[peer_id]["seat"]
 	roster.erase(peer_id)
 	_sync_roster.rpc(roster)
 	if game_in_progress:
-		# Spike behaviour: the match ends. Bot takeover or pausing comes later.
-		_abort_game.rpc("%s masadan kalktı, oyun bitti." % who)
+		Session.host_replace_with_bot(seat)  # the night goes on
 
 
 func _on_connection_failed() -> void:

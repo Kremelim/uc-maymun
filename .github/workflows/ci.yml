@@ -51,5 +51,8 @@ jobs:
       - name: Simulator smoke run
         run: timeout 120 "$GODOT" --headless --path game --script res://sim/simulate.gd -- --matches=20 --out="$RUNNER_TEMP/sim.md"
 
-      - name: End-to-end hidden information test
+      - name: End-to-end night (online equals the simulator, hidden information, voice)
         run: game/tests/e2e/run_e2e.sh
+
+      - name: End-to-end night where a player leaves (a bot takes over)
+        run: LEAVER=1 game/tests/e2e/run_e2e.sh

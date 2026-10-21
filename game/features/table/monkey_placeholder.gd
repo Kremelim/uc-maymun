@@ -1,7 +1,7 @@
 class_name MonkeyPlaceholder
 extends Node3D
-## Grey-box stand-in for a monkey: body, head, a floating label, and a voice
-## that comes from its head while the mouth follows how loud it is.
+## Grey-box stand-in for a monkey: body, head, a floating label, a hat while it
+## audits, and a voice that comes from its head while the mouth follows how loud it is.
 
 const MOUTH_CLOSED := 0.1
 ## Speech is quiet in RMS terms (around 0.05-0.2), so scale it up for the mouth.
@@ -22,6 +22,7 @@ var _voice_playback: AudioStreamGeneratorPlayback
 @onready var _label: Label3D = $Label3D
 @onready var _mouth: MeshInstance3D = $Head/Muzzle/Mouth
 @onready var _voice_player: AudioStreamPlayer3D = $Head/VoicePlayer
+@onready var _auditor_hat: MeshInstance3D = $Head/AuditorHat
 
 
 func set_player_name(player_name: String) -> void:
@@ -32,6 +33,10 @@ func set_player_name(player_name: String) -> void:
 func set_status(status: String) -> void:
 	_status = status
 	_update_label()
+
+
+func set_auditor(auditing: bool) -> void:
+	_auditor_hat.visible = auditing
 
 
 func setup_voice(mix_rate: int) -> void:
