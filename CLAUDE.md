@@ -17,16 +17,17 @@
 - **Abdulalim Çiftçi:** fikir ve destek; somut sorumluluk alanı belirlenecek.
 - **Ulaş Uzun:** fikir ve destek; somut sorumluluk alanı belirlenecek.
 
-## Durum (2026-10-20)
+## Durum (2026-10-21)
 
-- Faz 1: konsept + kağıt prototip (`docs/gdd/kurallar-v0.1.md`).
+- Faz 1: konsept + kağıt prototip (`docs/gdd/kurallar-v0.2.md`).
 - Motor: ADR-0001 önerildi (Godot 4.7, teknik spike'a bağlı).
 - M1 spike: Bölüm A (yerel ağ, gizli gelir, beyan) çalışıyor; Kerem 4 pencereyle Windows'ta doğruladı.
   Bölüm B: Steam lobisi iki ayrı evden 2 kişiyle doğrulandı (B1, B2). Steam daveti/overlay kendi App ID'mize kadar ertelendi.
   B3 (ses, `net/voice_chat.gd`): kod hazır, Windows'ta test bekliyor. Bkz. `docs/spike-m1.md`.
-- Kural motoru (`core/match_state.gd`, kurallar v0.1'in tamamı) ve simülatör (`sim/`) hazır.
-  Bulgular ve Kerem Gönç'ün kararını bekleyen öneriler: `docs/sim/bulgular-v0.1.md`. Kağıt prototip henüz oynanmadı.
-- Kabul edilenler: en az 3 oyuncu; fazla beyan da yalan (Kerem Gönç onayı bekliyor, `over_declaration_is_lie` ile kapatılabilir).
+- Kural motoru (`core/match_state.gd`) ve simülatör (`sim/`) hazır. Oyun `data/rules_v0_2.tres` kullanır.
+- Kurallar v0.2 (2026-10-21, Kerem Ataç kabul etti): denetçinin kartı açık, asgari katkı beyanın %60'ı (beyanlar açılınca ödenir),
+  son tur dükkanı kapalı, fazla beyan da yalan, en az 3 oyuncu.
+  Açık sorular ve Kerem Gönç'ün kararını bekleyenler: `docs/sim/bulgular-v0.2.md`. Kağıt prototip henüz oynanmadı.
 - Takvim: sabit tarih yok; kilometre taşlarıyla ilerleniyor (`docs/yol-haritasi.md`).
 
 ## Geliştirme ortamı
@@ -46,8 +47,9 @@
     (autoload'lar yüklendikten sonra çalışır; test sırasında motor hatası olursa test başarısız sayılır)
   - E2E (1 host + 3 istemci, gerçek ENet, `--fake-voice` ile ses aktarımı dahil): `GODOT=godot game/tests/e2e/run_e2e.sh`
   - Simülatör (botlarla deneyler, Markdown rapor yazar; 2000 maçlık tam rapor ~1 dakika sürer, seed sabit olduğu için her seferinde aynı çıkar):
-    `godot --headless --path game --script res://sim/simulate.gd -- --matches=2000 --out=$(pwd)/docs/sim/sonuclar-v0.1.md`
-    Kural değişince yeniden çalıştırıp `docs/sim/bulgular-*.md`'yi güncelle.
+    `godot --headless --path game --script res://sim/simulate.gd -- --matches=2000 --out=$(pwd)/docs/sim/sonuclar-v0.2.md`
+    Kural sürümü değişince: yeni `data/rules_vX.tres`, `simulate.gd`'de `RULES` ve deneyler, yeni `sonuclar-`/`bulgular-` dosyaları.
+    Eski raporlar, onları üreten commit not edilerek kalır.
     (loglarda motor hatası ya da sızıntı uyarısı varsa, testler geçse bile başarısız sayılır)
   - Görsel kontrol (masayı Xvfb altında çizip PNG kaydeder): kullanımı `game/tests/visual/render_table.gd` başında. Arayüz değiştiğinde çalıştırıp görüntüye bak.
 - CI (`.github/workflows/ci.yml`) her PR'da import, uyarı kontrolü, unit ve E2E çalıştırır.
