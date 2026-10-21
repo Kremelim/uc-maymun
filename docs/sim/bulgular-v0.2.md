@@ -2,6 +2,9 @@
 
 > Son güncelleme: 2026-10-21 · Ham sonuçlar: [sonuclar-v0.2.md](sonuclar-v0.2.md) (deney başına 2000 maç) · Önceki: [bulgular-v0.1.md](bulgular-v0.1.md)
 > Kerem Gönç'ün kararını bekleyen maddeler **[KARAR]**, önerilerimiz **[ÖNERİ]** ile işaretli.
+>
+> **Sonuç:** Senet ve kayan ilk denetçi (4 maçlık gece) [kurallar v0.3'e](../gdd/kurallar-v0.3.md) girdi; yarım ceza ölçüldü, alınmadı. Bkz. [bulgular-v0.3.md](bulgular-v0.3.md).
+> Bu raporu üreten simülatör sürümü `6695b6c` commit'inde (`git checkout 6695b6c` ile aynı sonuçlar tekrar üretilebilir).
 
 [Kurallar v0.2](../gdd/kurallar-v0.2.md), v0.1'in simülasyon önerileriyle güncellenmiş hali:
 - denetçinin kartı açık;
@@ -127,7 +130,7 @@ v0.1'deki önerili paket deneyleri (E17, E18), v0.2'deki aynı masalarla (E6, E2
    - Senet ve yarım ceza varyantları.
    - Ardından masadakilere göre davranışını değiştiren (uyarlanan) botlar.
 
-Simülatörü çalıştırmak:
+Simülatörü çalıştırmak (bu raporu tekrar üretmek için önce `git checkout 6695b6c`; şimdiki simülatör v0.3'ü çalıştırıyor):
 
 ```
 godot --headless --path game --script res://sim/simulate.gd -- --matches=2000 --out=$(pwd)/docs/sim/sonuclar-v0.2.md

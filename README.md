@@ -9,8 +9,8 @@ Dört maymun, tek masa, ortak bir borç: borcu birlikte ödeyin, cebe en çok pa
 
 - [Vizyon](docs/vision.md)
 - [Yol haritası](docs/yol-haritasi.md)
-- [Kurallar v0.2 (kağıt prototip)](docs/gdd/kurallar-v0.2.md)
-- [Simülasyon bulguları](docs/sim/bulgular-v0.2.md)
+- [Kurallar v0.3 (kağıt prototip)](docs/gdd/kurallar-v0.3.md)
+- [Simülasyon bulguları](docs/sim/bulgular-v0.3.md)
 - [ADR-0001: Oyun motoru](docs/adr/0001-oyun-motoru.md)
 - [M1 teknik spike](docs/spike-m1.md)
 - [Playtest şablonu](docs/playtests/_sablon.md)
