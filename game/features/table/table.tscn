@@ -131,75 +131,68 @@ fov = 65.0
 [node name="Hud" type="CanvasLayer" parent="."]
 
 [node name="TopBar" type="PanelContainer" parent="Hud"]
-anchors_preset = 10
-anchor_right = 1.0
 offset_left = 8.0
+offset_top = 8.0
+offset_right = 160.0
+offset_bottom = 38.0
+theme = SubResource("Theme_hud")
+theme_override_styles/panel = SubResource("Style_hud")
+
+[node name="PhaseLabel" type="Label" parent="Hud/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Masa hazırlanıyor…"
+
+[node name="TopRight" type="HBoxContainer" parent="Hud"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -160.0
 offset_top = 8.0
 offset_right = -8.0
 offset_bottom = 38.0
-grow_horizontal = 2
+grow_horizontal = 0
 theme = SubResource("Theme_hud")
-theme_override_styles/panel = SubResource("Style_hud")
+theme_override_constants/separation = 8
+alignment = 2
 
-[node name="Row" type="HBoxContainer" parent="Hud/TopBar"]
-layout_mode = 2
-theme_override_constants/separation = 16
-
-[node name="PhaseLabel" type="Label" parent="Hud/TopBar/Row"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Masa hazırlanıyor…"
-
-[node name="DebtLabel" type="Label" parent="Hud/TopBar/Row"]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="TimerLabel" type="Label" parent="Hud/TopBar/Row"]
+[node name="TimerLabel" type="Label" parent="Hud/TopRight"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.8, 0.35, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 20
 
-[node name="RulesButton" type="Button" parent="Hud/TopBar/Row"]
+[node name="MenuButton" type="MenuButton" parent="Hud/TopRight"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "Kurallar"
+text = "Menü"
+flat = false
 
-[node name="MePanel" type="PanelContainer" parent="Hud"]
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
+[node name="VoicePanel" type="PanelContainer" parent="Hud"]
+unique_name_in_owner = true
+visible = false
 offset_left = 8.0
-offset_top = -8.0
+offset_top = 46.0
 offset_right = 268.0
-offset_bottom = -8.0
-grow_vertical = 0
+offset_bottom = 46.0
 theme = SubResource("Theme_hud")
 theme_override_styles/panel = SubResource("Style_hud")
 
-[node name="VBox" type="VBoxContainer" parent="Hud/MePanel"]
+[node name="VBox" type="VBoxContainer" parent="Hud/VoicePanel"]
 layout_mode = 2
-theme_override_constants/separation = 6
 
-[node name="MeLabel" type="Label" parent="Hud/MePanel/VBox"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(240, 0)
-layout_mode = 2
-autowrap_mode = 3
-text = "Gelir bekleniyor…"
-
-[node name="VoiceRow" type="HBoxContainer" parent="Hud/MePanel/VBox"]
+[node name="VoiceRow" type="HBoxContainer" parent="Hud/VoicePanel/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="MicToggle" type="CheckButton" parent="Hud/MePanel/VBox/VoiceRow"]
-unique_name_in_owner = true
+[node name="MicLabel" type="Label" parent="Hud/VoicePanel/VBox/VoiceRow"]
 layout_mode = 2
-button_pressed = true
+theme_override_font_sizes/font_size = 12
 text = "Mikrofon"
 
-[node name="MicMeter" type="ProgressBar" parent="Hud/MePanel/VBox/VoiceRow"]
+[node name="MicMeter" type="ProgressBar" parent="Hud/VoicePanel/VBox/VoiceRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
@@ -208,7 +201,7 @@ size_flags_vertical = 4
 max_value = 1.0
 show_percentage = false
 
-[node name="IncomingVoiceLabel" type="Label" parent="Hud/MePanel/VBox"]
+[node name="IncomingVoiceLabel" type="Label" parent="Hud/VoicePanel/VBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(240, 0)
 layout_mode = 2
@@ -216,16 +209,23 @@ theme_override_font_sizes/font_size = 12
 autowrap_mode = 3
 text = "Gelen ses: —"
 
-[node name="LoopbackToggle" type="CheckButton" parent="Hud/MePanel/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "Kendi sesimi duy (mikrofon testi)"
+[node name="MePanel" type="PanelContainer" parent="Hud"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = -8.0
+offset_right = 168.0
+offset_bottom = -8.0
+grow_vertical = 0
+theme = SubResource("Theme_hud")
+theme_override_styles/panel = SubResource("Style_hud")
 
-[node name="LeaveButton" type="Button" parent="Hud/MePanel/VBox"]
+[node name="MeLabel" type="Label" parent="Hud/MePanel"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Masadan kalk"
+theme_override_font_sizes/font_size = 15
+text = "…"
 
 [node name="ActionPanel" type="PanelContainer" parent="Hud"]
 anchors_preset = 7
@@ -246,12 +246,22 @@ theme_override_styles/panel = SubResource("Style_action")
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="ActionTitle" type="Label" parent="Hud/ActionPanel/VBox"]
+[node name="TitleRow" type="HBoxContainer" parent="Hud/ActionPanel/VBox"]
+layout_mode = 2
+
+[node name="ActionTitle" type="Label" parent="Hud/ActionPanel/VBox/TitleRow"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 0.8, 0.35, 1)
 theme_override_font_sizes/font_size = 20
 text = "Masa hazırlanıyor"
+
+[node name="HelpButton" type="Button" parent="Hud/ActionPanel/VBox/TitleRow"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Bu aşamanın kuralı"
+text = " ? "
 
 [node name="ActionLabel" type="Label" parent="Hud/ActionPanel/VBox"]
 unique_name_in_owner = true
@@ -358,15 +368,9 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Hazırım"
 
-[node name="WaitingLabel" type="Label" parent="Hud/ActionPanel/VBox"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(392, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.65, 0.6, 0.55, 1)
-theme_override_font_sizes/font_size = 12
-autowrap_mode = 3
 
 [node name="LogPanel" type="PanelContainer" parent="Hud"]
+visible = false
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
@@ -459,10 +463,10 @@ visible = false
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -220.0
-offset_top = 70.0
-offset_right = 220.0
-offset_bottom = 150.0
+offset_left = -180.0
+offset_top = 48.0
+offset_right = 180.0
+offset_bottom = 110.0
 grow_horizontal = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("Style_banner")
@@ -479,14 +483,14 @@ layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.82, 0.38, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 28
 text = "Beyanlar açıldı"
 horizontal_alignment = 1
 
 [node name="BannerSubtitle" type="Label" parent="Hud/Banner/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 15
 text = "Kayıp jeton: 3"
 horizontal_alignment = 1
 

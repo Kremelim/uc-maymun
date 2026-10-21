@@ -22,11 +22,16 @@ func _ready() -> void:
 			hide()
 		else:
 			_show(_page + 1))
-	_close_button.pressed.connect(hide)
-	visibility_changed.connect(func() -> void:
-		if visible:
-			_show(0))
+	_close_button.pressed.connect(func() -> void:
+		hide()
+		_show(0))
 	_show(0)
+
+
+## Opens on one page, e.g. the rule of the phase being played.
+func show_page(page: int) -> void:
+	_show(page)
+	show()
 
 
 static func pages(rules: RulesConfig) -> Array[Dictionary]:

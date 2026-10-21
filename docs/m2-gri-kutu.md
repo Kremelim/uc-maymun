@@ -58,24 +58,32 @@ M1 B2'deki gibi:
 
 ## Ekran
 
-- **Üst çubuk:** maç ve tur, aşama, denetçi, bu tur ödenecek taksit, kasadaki jeton, pazarlık süresi, **Kurallar** düğmesi.
-- **Ortada, büyük:** önemli anların duyuruları (birkaç saniye görünür, kayıtta da kalır).
-- **Masa:** kasadaki jetonlar ve her oyuncunun önünde beyan kartı.
-- **Sol alt (sen):** gelirin (sadece sen görürsün), cebin, beyanın ve ödenen asgarin, senetlerin, aksesuarların, gece puanın, ses ayarları.
-- **Orta alt (eylem kartı):** aşamanın adı, ne olduğu, ne yapacağın ve düğmeler. Sıra sendeyse kenarı parlar. Alttaki gri satır kimin beklendiğini gösterir.
+İkinci denemeden sonra ekran sadeleştirildi ("çok fazla yazı var"). Kural: her an tek bir yere bakmak yeter, o da ortadaki eylem kartı.
 
-  | Aşama | Ne yapılır |
-  |---|---|
-  | Beyan | Sayıyı seç, **Beyan et**. Herkes beyan edince açılır. Denetçinin kartı açık, beyanı gelirine kilitli. |
-  | Konuşma / Pazarlık | Konuşun. İkinci maçtan itibaren kefil olabilir, masa altından jeton verebilirsin. **Hazırım**. Herkes hazır olunca ya da 2 dakika dolunca biter. |
-  | Katkı | Asgari zaten ödendi. Üstüne koyacağın jetonu seç, **Avucunu kapat**. |
-  | Denetim (denetçi) | Kimi denetleyeceğini seç. Sonra kartını gör: **Raporluyorum** ya da **Temiz** (temiz dersen tazminat ödersin; yalanı görüp temiz demek örtbas). |
-  | Denetim (diğerleri) | Bekle ya da masa altından rüşvet ver. |
-  | Dükkan | Aksesuar al (herkes görür), **Turu bitir**. Son turda dükkan kapalı. |
-  | Hesap Günü | Bütün gelirler ve beyanlar (kırmızı = yalan), örtbaslar, masa altı transferler, servet, puan, gece toplamı. **Sonraki maça hazırım**. |
+- **Sol üst:** sadece maç ve tur ("Maç 1/4 · Tur 2/4 · temel kurallar").
+- **Sağ üst:** pazarlık süresi (sadece pazarlıkta) ve **Menü**:
+  - Kurallar;
+  - Olay kaydı (aç/kapa);
+  - Mikrofon, ses ayrıntıları, kendi sesini duyma;
+  - Masadan kalk.
+- **Ortada, kısa süre:** önemli anların duyuruları (beyanlar açıldı, YAKALANDI!, taksit eksik…).
+- **Masa:**
+  - kasadaki jetonlar ve "Kasa 8 / 12";
+  - her oyuncunun önünde beyan kartı (herkes beyan edene kadar kapalı);
+  - alınan aksesuarlar küçük şekiller olarak (M3'te maymunların üstüne geçecek).
+- **Maymunların üstü:** sadece ad ve tek işaret. "…" bekleniyor, "✓" hazır, sarı şapka denetçi. Pazarlıkta kimin kime kefil olduğu da burada.
+- **Orta alt (eylem kartı):** aşamanın adı, tek kısa cümle ve düğmeler. Sıra sendeyse kenarı parlar. Kartın köşesindeki **?** o aşamanın kuralını açar.
+- **Sol alt:** gelirin, cebin, puanın (ve varsa senedin).
 
-- **Sağ alt (olaylar):** masada olan her şey. Sarı satırlar sadece seni ilgilendiren gizli şeyler (masa altı).
-- **Maymunların üstü:** ad, denetçi şapkası (sarı), katkı, kimin kefili olduğu, aksesuarlar, senet. Beyanlar masadaki kartlarda.
+| Aşama | Ne yapılır |
+|---|---|
+| Beyan | Sayıyı seç, **Beyan et**. Denetçinin kartı açık, beyanı gelirine kilitli. |
+| Konuşma / Pazarlık | Konuşun. İkinci maçtan itibaren kefil ve masa altı da var. **Hazırım**. Herkes hazır olunca ya da 2 dakika dolunca biter. |
+| Katkı | Asgari zaten ödendi. Üstüne koyacağın jetonu seç, **Avucunu kapat**. |
+| Denetim (denetçi) | Kimin kartına bakacağını seç. Sonra **Raporla** ya da **Göz yum** (örtbas). Doğru söyleyene **Temiz** dersin. |
+| Denetim (diğerleri) | Bekle. İkinci maçtan itibaren masa altından rüşvet verebilirsin. |
+| Dükkan | Aksesuar al (herkes görür), **Turu bitir**. İlk maçta ve son turda yok. |
+| Hesap Günü | Bütün gelirler ve beyanlar (kırmızı = yalan), kim kaç kez yalan söyledi ve yakalandı, örtbaslar, masa altı, servet, puan. **Sonraki maça hazırım**. |
 
 ## Deneme listesi (ekibe)
 

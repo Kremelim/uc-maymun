@@ -40,7 +40,7 @@ func _ready() -> void:
 	Network.basic_first_match = _basic_check.button_pressed
 	_basic_check.toggled.connect(func(on: bool) -> void: Network.basic_first_match = on)
 	_play_bots_button.pressed.connect(_on_play_bots_pressed)
-	_how_to_button.pressed.connect(_how_to_play.show)
+	_how_to_button.pressed.connect(_how_to_play.show_page.bind(0))
 	_show_how_to_once()
 	Network.roster_changed.connect(_on_roster_changed)
 	Network.connection_failed.connect(_on_connection_failed)
@@ -68,7 +68,7 @@ func _show_how_to_once() -> void:
 	var seen := ConfigFile.new()
 	seen.set_value("how_to", "seen", true)
 	seen.save(SEEN_FILE)
-	_how_to_play.show()
+	_how_to_play.show_page(0)
 
 
 ## One click: a table on this computer, bots in the other seats, and the game starts.
