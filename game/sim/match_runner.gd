@@ -39,7 +39,7 @@ static func play(rules: RulesConfig, bots: Array[SimBot], match_seed: int) -> Di
 		state.end_negotiation()
 		var due := state.installment_due()
 		for seat in bots.size():
-			state.contribute(seat, maxi(bots[seat].contribution(state.view_for(seat)), state.min_contribution(seat)))
+			state.contribute(seat, bots[seat].contribution(state.view_for(seat)))
 			if bots[seat].sank_the_table:
 				sank_table[seat] = 1
 
@@ -76,6 +76,9 @@ static func play(rules: RulesConfig, bots: Array[SimBot], match_seed: int) -> Di
 				state.buy(seat, item)
 		state.end_round()
 
+	var unpaid_debt := 0
+	for past: Dictionary in state.history:
+		unpaid_debt += int(past["unpaid"])
 	var wealth := PackedInt32Array()
 	var last_shop_gain := PackedInt32Array()
 	for seat in bots.size():
@@ -95,6 +98,7 @@ static func play(rules: RulesConfig, bots: Array[SimBot], match_seed: int) -> Di
 		"bribes_paid": bribes_paid,
 		"sank_table": sank_table,
 		"shortfall_rounds": shortfall_rounds,
+		"unpaid_debt": unpaid_debt,
 		"close_rounds": close_rounds,
 	}
 

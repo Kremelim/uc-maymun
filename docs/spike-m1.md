@@ -206,7 +206,7 @@ Bana gönder: duyup duymadığınız, gecikme ve ses kalitesi hakkında izlenimi
 ## Bilinen sınırlar (bilerek ertelendi)
 
 - **2 kişide gizli bilgi kalmıyor.** Masaya dağıtılan toplam bilindiği için 2 kişide herkes diğerinin gelirini hesaplayabiliyor.
-  Spike'ta test kolaylığı için 2 kişiyle başlanabiliyor; oyunun gerçek alt sınırı 3 olmalı (`docs/gdd/kurallar-v0.1.md`).
+  Spike'ta test kolaylığı için 2 kişiyle başlanabiliyor; oyunun gerçek alt sınırı 3 (`docs/gdd/kurallar-v0.2.md`).
 - Ses sadece Steam'le çalışıyor; yerel ağ modunda gerçek mikrofon yok (sadece `--fake-voice` test tonu). Bas-konuş (push-to-talk), fısıltı ve oyuncu başına sessize alma M2'de.
 - Bir oyuncu oyun sırasında ayrılırsa maç biter ve herkes lobiye döner. Bot devralması ya da duraklatma M2'de.
 - Arayüz metinleri kodda Türkçe yazılı. Çeviri sistemi (TR/EN) M2'de.

@@ -2,6 +2,7 @@ class_name RulesConfig
 extends Resource
 ## Tunable game numbers. Values live in data/*.tres and mirror docs/gdd/;
 ## logic must read them from here instead of hard-coding them.
+## Defaults are rules v0.1; data/rules_v0_2.tres holds the current rules.
 
 @export var max_players: int = 4
 ## With two players the known total gives away the other player's income.
@@ -25,15 +26,16 @@ extends Resource
 @export var audit_compensation: int = 1
 ## Paid by the bank to everyone who vouched for a player called clean.
 @export var vouch_reward: int = 2
-## Declaring more than you got counts as a lie too. Pending Kerem Gönç's approval.
+## Declaring more than you got counts as a lie too.
 @export var over_declaration_is_lie: bool = true
-## Variant, not in v0.1: the auditor's income card is shown, so the round nobody
-## can audit them stops being a free lie (docs/sim/bulgular-v0.1.md).
+## On in v0.2: the auditor's income card is shown, so the round nobody can audit
+## them stops being a free lie (docs/sim/bulgular-v0.1.md).
 @export var auditor_card_open: bool = false
 
 @export_group("Contributions")
-## Variant, not in v0.1: everyone must put in at least this share of what they
-## declared (or all their cash), so declaring honestly and paying little stops paying off.
+## 0.6 in v0.2: everyone pays this share of what they declared (rounded up, or all
+## their cash) when the declarations are revealed, so declaring honestly and paying
+## little stops paying off.
 @export var min_contribution_ratio: float = 0.0
 
 @export_group("Shop")
@@ -41,7 +43,8 @@ extends Resource
 @export var accessory_prices := PackedInt32Array()
 ## What each accessory is worth at the end: a status bonus over its price.
 @export var accessory_values := PackedInt32Array()
-## Whether the shop opens after the last round's audit too.
+## Whether the shop opens after the last round's audit too. Off in v0.2: with no
+## audit left, buying is a free bonus rather than a risk.
 @export var last_round_shop: bool = true
 
 @export_group("Scoring")

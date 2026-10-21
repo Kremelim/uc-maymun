@@ -2,6 +2,9 @@
 
 > Son güncelleme: 2026-10-20 · Ham sonuçlar: [sonuclar-v0.1.md](sonuclar-v0.1.md) (deney başına 2000 maç)
 > Kerem Gönç'ün kararını bekleyen maddeler **[KARAR]** ile işaretli.
+>
+> **Sonuç:** Üç öneri ve fazla beyan kuralı kabul edildi, [kurallar v0.2](../gdd/kurallar-v0.2.md) oldu. Yeni bulgular: [bulgular-v0.2.md](bulgular-v0.2.md).
+> Bu raporu üreten simülatör sürümü `1b5964f` commit'inde (`git checkout 1b5964f` ile aynı sonuçlar tekrar üretilebilir).
 
 Kurallar v0.1'in tamamı (gelir, beyan, kefil, masa altı, katkı, denetim, örtbas, taksit, haciz, aksesuar,
 Hesap Günü, gece skoru) koda geçirildi. Farklı oyuncu tiplerini temsil eden botlarla on binlerce maç oynatıldı.
@@ -92,7 +95,7 @@ Botlar bilerek basit tutuldu. Her biri bir oyuncu tipi:
 2. **Kağıt prototip:** Önerili ve önerisiz birer maç oynayın, farkı masada hissedin. Özellikle örtbası ve fazla beyanı gözleyin.
 3. **Simülatör:** Kararlardan sonra tekrar çalıştırılır. Bir sonraki adım, masadakilere göre davranışını değiştiren (uyarlanan) botlar.
 
-Simülatörü çalıştırmak:
+Simülatörü çalıştırmak (bu raporu tekrar üretmek için önce `git checkout 1b5964f`; şimdiki simülatör v0.2'yi çalıştırıyor):
 
 ```
 godot --headless --path game --script res://sim/simulate.gd -- --matches=2000 --out=$(pwd)/docs/sim/sonuclar-v0.1.md

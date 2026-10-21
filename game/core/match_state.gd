@@ -1,13 +1,14 @@
 class_name MatchState
 extends RefCounted
-## One whole match under rules v0.1 (docs/gdd/kurallar-v0.1.md). Pure and seeded:
+## One whole match under the paper prototype rules (docs/gdd/kurallar-v0.2.md;
+## RulesConfig switches turn it back into v0.1). Pure and seeded:
 ## no nodes, no networking. Whoever runs the match (the host, or the simulator)
 ## feeds it each phase's decisions in order. Players may only see view_for(seat)
 ## and, as the auditor, audit_peek(); reveal() is for Hesap Günü at the end.
 ##
-## Round: start_round → declare (all) → vouch / transfer → end_negotiation →
-## contribute (all) → choose_audit_target → [audit_peek, transfer] →
-## resolve_audit → buy → end_round.
+## Round: start_round → declare (all; minimums are paid at the reveal) →
+## vouch / transfer → end_negotiation → contribute (all) → choose_audit_target →
+## [audit_peek, transfer] → resolve_audit → buy → end_round.
 
 enum Phase { ROUND_OVER, DECLARE, NEGOTIATE, CONTRIBUTE, AUDIT_CHOOSE, AUDIT_DECIDE, SHOP, MATCH_OVER }
 
@@ -28,6 +29,9 @@ var accessories: Array = []
 var incomes := PackedInt32Array()
 var declarations := PackedInt32Array()
 var vouches := PackedInt32Array()
+## Paid by each seat the moment the declarations are revealed. Public.
+var minimums := PackedInt32Array()
+## Each seat's whole contribution this round (minimum + extra), once everyone has chosen.
 var contributions := PackedInt32Array()
 var pot := 0
 var audit_target := NONE
@@ -37,9 +41,10 @@ var history: Array[Dictionary] = []
 
 var _secrets: Array[Dictionary] = []  # per finished round, for Hesap Günü
 var _transfers: Array[Dictionary] = []  # this round's under-the-table transfers
+var _extras := PackedInt32Array()  # closed fists, until everyone has chosen
 var _audit: Dictionary = {}  # this round's public audit outcome
 var _covered_up := false
-var _unpaid := 0
+var _unpaid := 0  # payments nobody could make this round; they join the common debt
 var _rng := RandomNumberGenerator.new()
 
 
@@ -84,7 +89,9 @@ func start_round() -> void:
 		cash[seat] += incomes[seat]
 	declarations = _filled(NONE)
 	vouches = _filled(NONE)
+	minimums = _filled(0)
 	contributions = _filled(NONE)
+	_extras = _filled(NONE)
 	pot = 0
 	audit_target = NONE
 	_transfers = []
@@ -102,6 +109,7 @@ func declare(seat: int, amount: int) -> bool:
 		return false  # everyone can see the auditor's card
 	declarations[seat] = amount
 	if not declarations.has(NONE):
+		_pay_minimums()
 		phase = Phase.NEGOTIATE
 	return true
 
@@ -135,21 +143,22 @@ func end_negotiation() -> void:
 	phase = Phase.CONTRIBUTE
 
 
-## The least `seat` may put in this round under min_contribution_ratio (never more than its cash).
-func min_contribution(seat: int) -> int:
-	return mini(ceili(declarations[seat] * rules.min_contribution_ratio), cash[seat])
+## What a declaration of `amount` obliges a seat to pay right away under min_contribution_ratio.
+func minimum_for(amount: int) -> int:
+	return ceili(amount * rules.min_contribution_ratio)
 
 
-## Contributions are made in closed fists: they count once everyone has chosen.
-func contribute(seat: int, amount: int) -> bool:
-	if phase != Phase.CONTRIBUTE or not _is_seat(seat) or amount < min_contribution(seat) or amount > cash[seat]:
+## Contributions on top of the minimum, in closed fists: they count once everyone has chosen.
+func contribute(seat: int, extra: int) -> bool:
+	if phase != Phase.CONTRIBUTE or not _is_seat(seat) or extra < 0 or extra > cash[seat]:
 		return false
-	contributions[seat] = amount
-	if not contributions.has(NONE):
+	_extras[seat] = extra
+	if not _extras.has(NONE):
 		for s in seat_count:
-			cash[s] -= contributions[s]
+			cash[s] -= _extras[s]
+			pot += _extras[s]
+			contributions[s] = minimums[s] + _extras[s]
 			total_contributed[s] += contributions[s]
-			pot += contributions[s]
 		phase = Phase.AUDIT_CHOOSE
 	return true
 
@@ -231,8 +240,10 @@ func end_round() -> void:
 		"declarations": declarations.duplicate(),
 		"missing": missing(),
 		"vouches": vouches.duplicate(),
+		"minimums": minimums.duplicate(),
 		"contributions": contributions.duplicate(),
 		"audit": _audit.duplicate(),
+		"unpaid": _unpaid,
 		"carry_after": carry,
 	})
 	_secrets.append({
@@ -330,6 +341,7 @@ func view_for(seat: int) -> Dictionary:
 		"declarations": declarations.duplicate() if declarations_open else PackedInt32Array(),
 		"missing": missing() if declarations_open else 0,
 		"vouches": vouches.duplicate(),
+		"minimums": minimums.duplicate(),
 		"contributions": contributions.duplicate() if contributions_open else PackedInt32Array(),
 		"audit": _audit.duplicate(),
 		"accessories": accessories.duplicate(true),
@@ -373,6 +385,15 @@ func _pay(from: int, to: int, amount: int) -> void:
 	else:
 		cash[to] += paid
 	_unpaid += owed
+
+
+## Straight from the income just dealt, before anyone can pass coins under the table:
+## otherwise emptying your pocket into a friend's would dodge the minimum.
+func _pay_minimums() -> void:
+	for seat in seat_count:
+		minimums[seat] = mini(minimum_for(declarations[seat]), cash[seat])
+		cash[seat] -= minimums[seat]
+		pot += minimums[seat]
 
 
 func _close_installment() -> void:

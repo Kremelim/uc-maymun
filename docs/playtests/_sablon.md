@@ -1,6 +1,6 @@
 # Playtest — YYYY-AA-GG — (kısa başlık)
 
-- **Sürüm / kurallar:** (ör. kurallar-v0.1, kağıt)
+- **Sürüm / kurallar:** (ör. kurallar-v0.2, kağıt)
 - **Oyuncular:** (isimler, kaçı ilk kez oynadı)
 - **Kaç maç / süre:**
 
