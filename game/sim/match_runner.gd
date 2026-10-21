@@ -8,8 +8,8 @@ extends RefCounted
 const CLOSE_MARGIN := 2
 
 
-static func play(rules: RulesConfig, bots: Array[SimBot], match_seed: int) -> Dictionary:
-	var state := MatchState.new(rules, bots.size(), match_seed)
+static func play(rules: RulesConfig, bots: Array[SimBot], match_seed: int, first_auditor: int = 0) -> Dictionary:
+	var state := MatchState.new(rules, bots.size(), match_seed, first_auditor)
 	for i in bots.size():
 		bots[i].rules = rules
 		bots[i].rng.seed = hash([match_seed, i])
@@ -50,7 +50,7 @@ static func play(rules: RulesConfig, bots: Array[SimBot], match_seed: int) -> Di
 		var report := true
 		var lie := state.lie_amount(target)
 		if lie != 0:
-			var fine := absi(lie) * rules.fine_multiplier
+			var fine := state.fine_for(lie)
 			var price := bots[auditor].cover_up_price(fine, rules.audit_compensation)
 			var loss := maxi(lie, 0) + fine - _voucher_share(state, target, fine)
 			if price > 0 and bots[target].accepts_cover_up(price, loss, rules.audit_compensation, state.cash[target]):
@@ -79,6 +79,9 @@ static func play(rules: RulesConfig, bots: Array[SimBot], match_seed: int) -> Di
 	var unpaid_debt := 0
 	for past: Dictionary in state.history:
 		unpaid_debt += int(past["unpaid"])
+	var iou_total := 0
+	for iou: Dictionary in state.ious:
+		iou_total += int(iou["amount"])
 	var wealth := PackedInt32Array()
 	var last_shop_gain := PackedInt32Array()
 	for seat in bots.size():
@@ -99,6 +102,7 @@ static func play(rules: RulesConfig, bots: Array[SimBot], match_seed: int) -> Di
 		"sank_table": sank_table,
 		"shortfall_rounds": shortfall_rounds,
 		"unpaid_debt": unpaid_debt,
+		"iou_total": iou_total,
 		"close_rounds": close_rounds,
 	}
 

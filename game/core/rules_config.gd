@@ -2,7 +2,7 @@ class_name RulesConfig
 extends Resource
 ## Tunable game numbers. Values live in data/*.tres and mirror docs/gdd/;
 ## logic must read them from here instead of hard-coding them.
-## Defaults are rules v0.1; data/rules_v0_2.tres holds the current rules.
+## Defaults are rules v0.1; data/rules_v0_3.tres holds the current rules.
 
 @export var max_players: int = 4
 ## With two players the known total gives away the other player's income.
@@ -20,8 +20,9 @@ extends Resource
 @export var shortfall_interest: float = 1.5
 
 @export_group("Audit")
-## A caught liar returns what they hid and pays the difference times this as a fine to the auditor.
-@export var fine_multiplier: int = 1
+## A caught liar returns what they hid and pays the difference times this (rounded up)
+## as a fine to the auditor.
+@export var fine_multiplier: float = 1.0
 ## The auditor pays this to someone they audited and called clean.
 @export var audit_compensation: int = 1
 ## Paid by the bank to everyone who vouched for a player called clean.
@@ -31,6 +32,9 @@ extends Resource
 ## On in v0.2: the auditor's income card is shown, so the round nobody can audit
 ## them stops being a free lie (docs/sim/bulgular-v0.1.md).
 @export var auditor_card_open: bool = false
+## On in v0.3: a payment to another player that neither cash nor accessories can cover
+## becomes an IOU (senet), settled at Hesap Günü, instead of joining the common debt.
+@export var unpaid_becomes_iou: bool = false
 
 @export_group("Contributions")
 ## 0.6 in v0.2: everyone pays this share of what they declared (rounded up, or all
@@ -50,3 +54,7 @@ extends Resource
 @export_group("Scoring")
 ## Night score per match by placement, when the table survives. A sunk table scores 0 for all.
 @export var placement_points := PackedInt32Array([5, 3, 2, 1])
+## 4 in v0.3: with rotate_first_auditor everyone audits first once a night.
+@export var matches_per_night: int = 3
+## On in v0.3: each new match of a night, the first auditor moves one seat on.
+@export var rotate_first_auditor: bool = false
