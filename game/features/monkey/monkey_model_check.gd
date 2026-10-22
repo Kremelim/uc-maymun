@@ -21,6 +21,8 @@ const FLOOR_TOLERANCE := 0.05
 const TRIANGLE_WARNING := 20000
 const TRIANGLE_LIMIT := 30000
 const TEXTURE_LIMIT := 2048
+## The skeleton's name after Godot's humanoid retargeting on import.
+const SHARED_SKELETON := "GeneralSkeleton"
 
 var errors := PackedStringArray()
 var warnings := PackedStringArray()
@@ -66,6 +68,10 @@ func inspect(root: Node, accessory_keys: PackedStringArray) -> void:
 
 func _check_skeleton(skeleton: Skeleton3D, root: Node) -> void:
 	notes.append("İskelet: %d kemik" % skeleton.get_bone_count())
+	# Import with a bone map renames the skeleton to %GeneralSkeleton; then animations
+	# can be shared between models (docs/sanatci-sartnamesi.md, section 10).
+	if skeleton.name != SHARED_SKELETON or not skeleton.unique_name_in_owner:
+		warnings.append("İçe aktarırken kemik eşleme (Bone Map) açılmamış: animasyonlar modeller arasında paylaşılamaz (şartname, bölüm 10).")
 	var missing := _missing(REQUIRED_BONES, func(bone: String) -> bool: return skeleton.find_bone(bone) >= 0)
 	if not missing.is_empty():
 		errors.append("Eksik kemik: %s" % ", ".join(missing))

@@ -34,6 +34,9 @@
 - M3a teknik hazırlık bitti (ADR-0003 önerildi): tek `Monkey` sınıfı (`features/monkey/`), hangi koltukta hangi model
   `assets/monkeys/cast.tres`'te. Modelin kuralları `docs/sanatci-sartnamesi.md` (sanatçıya İngilizcesi `docs/artist-spec.en.md`).
   Gerçek modeller gelene kadar masada Blender betiğiyle üretilen ücretsiz test maymunu (`tools/blender/make_test_monkey.py`).
+- M3b (karakter siparişi) başladı: `docs/m3b-karakter.md` (aşamalar, bütçe, sanatçı bulma, sözleşme), ilan `docs/artist-job-post.en.md`.
+  Para harcanmadan önce ekip kararları gerekiyor (aynı belgede). Modeller BoneMap + Fix Silhouette ile içe aktarılır (iskelet `%GeneralSkeleton`,
+  animasyonlar modeller arasında paylaşılır). Hazır oturma animasyonları (Quaternius) masaya uymadı; temel animasyonlar siparişte.
 - Kurallar v0.3 (2026-10-21, Kerem Ataç kabul etti): v0.2 (denetçinin kartı açık, asgari katkı beyanın %60'ı ve beyanlar açılınca ödenir,
   son tur dükkanı kapalı, fazla beyan da yalan, en az 3 oyuncu) + ödenemeyen ceza senet olur + gece 4 maç, ilk denetçi her maç kayar.
   Açık sorular ve Kerem Gönç'ün kararını bekleyenler: `docs/sim/bulgular-v0.3.md`. Kağıt prototip henüz oynanmadı.

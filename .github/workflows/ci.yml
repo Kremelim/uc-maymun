@@ -13,8 +13,20 @@ jobs:
       GODOT: ${{ github.workspace }}/.godot-bin/godot
     steps:
       - uses: actions/checkout@v4
+
+      # LFS files (GodotSteam's native libraries, the models) come from a cache when they
+      # have not changed: every download counts against the account's monthly LFS bandwidth.
+      - name: List LFS files
+        run: git lfs ls-files --long | cut -d ' ' -f1 | sort > .lfs-assets-id
+
+      - name: Cache LFS files
+        uses: actions/cache@v4
         with:
-          lfs: true  # GodotSteam's native libraries are stored in LFS
+          path: .git/lfs
+          key: lfs-${{ hashFiles('.lfs-assets-id') }}
+
+      - name: Pull LFS files
+        run: git lfs pull
 
       - name: Cache Godot
         id: cache-godot

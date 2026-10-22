@@ -32,6 +32,15 @@ M0 ve M1 birbirinden bağımsız, aynı anda yürür.
   - masada ücretsiz test maymunu.
 
   Kalanlar ekipte: referans panosu ve görsel yön kararı.
+- M3b için sipariş paketi hazır ([m3b-karakter.md](m3b-karakter.md)):
+  - kararlar;
+  - aşamalar ve ödeme;
+  - bütçe tahmini;
+  - sanatçı bulma ve değerlendirme;
+  - sözleşme maddeleri;
+  - İngilizce ilan metni.
+
+  Para harcanmadan önce ekip testi, bütçe, görsel yön ve ekip sözleşmesinin "fikri mülkiyet / harcamalar" maddeleri netleşmeli.
 
 ## Çalışma ritmi
 
