@@ -35,6 +35,9 @@
 2. **Hangi koltukta hangi model:** bir kaynak dosyasında: `assets/monkeys/cast.tres` (`MonkeyCast`). Yeni maymunlar burada değişir; kod değişmez.
 3. **Biçim:** glTF 2.0 binary (`.glb`), bir maymun bir dosya. Blender'da -Y'ye bakar, 1 birim = 1 m, başlangıç noktası ayakların arasında.
 4. **İskelet:** Godot'nun insansı profilindeki kemik adları (`SkeletonProfileHumanoid`). Mixamo düzeni içe aktarırken BoneMap ile eşlenebilir.
+   - Her model, adları doğru olsa da, BoneMap ve Fix Silhouette açık içe aktarılır (M3b'de eklendi).
+   - İskelet `%GeneralSkeleton` olur ve animasyon izleri bütün modellerde aynı yolu kullanır. Böylece animasyonlar modeller arasında paylaşılabilir.
+   - Quaternius'un hazır animasyonlarıyla sınandı: [M3b belgesi](../m3b-karakter.md#hazır-animasyon-denemesi).
 5. **Ağız ve göz:** `jaw_open` ve `blink` blend shape'leri.
    - Oyun her karede ayarlar: ses seviyesinden ağız, rastgele göz kırpma.
    - Animasyonlar bunlara dokunmaz.

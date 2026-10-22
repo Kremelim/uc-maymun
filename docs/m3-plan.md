@@ -88,7 +88,14 @@ Fiyatlar ve lisanslar 2026-10-21'de kontrol edildi. Fiyatlar dolar cinsinden; "t
 
 **Sonuç:** İstediğimiz stilde, hazır, kaliteli bir maymun karakteri yok. Hazır paketler oda, masa üstü nesneleri ve animasyon için işe yarıyor.
 
-**Repo notu:** Ücretli paketler repoya girecekse repo özel (private) kalmalı; Synty ve Fab lisansları başkalarına dağıtmayı yasaklıyor. Büyük dosyalar Git LFS kotasını da dolduracak; GitHub kotasını M3b'den önce kontrol edelim.
+**Repo notu:** Ücretli paketler repoya girecekse repo özel (private) kalmalı; Synty ve Fab lisansları başkalarına dağıtmayı yasaklıyor.
+
+**Git LFS kotası** (M3b'de kontrol edildi):
+- **Kota:** GitHub Free'de ayda 10 GiB depolama ve 10 GiB indirme ([GitHub](https://docs.github.com/billing/managing-billing-for-git-large-file-storage/about-billing-for-git-large-file-storage)).
+- **Şu an:** LFS'te ~19 MB var (GodotSteam kütüphaneleri ve test maymunu).
+- **CI:** Her çalıştırmada LFS dosyalarını indiriyordu. Artık önbellekten alıyor; dosyalar değişmedikçe indirmiyor.
+- **Ekip klonları:** Her klon ve çekme de kotadan yer.
+- **Öneri (hesap sahibine):** GitHub → Settings → Billing'de LFS bütçesini $0'a ayarlayın. Kota dolarsa ücret çıkmaz, o ayın kalanında LFS durur.
 
 ### Sipariş (serbest sanatçı)
 
@@ -191,7 +198,7 @@ Kabaca; kesin fiyat sanatçı tekliflerinden sonra belli olur.
 |---|---|---|
 | **M3a** | Referans panosu → görsel yön kararı (ADR-0004). Sanatçı şartnamesi. Teknik hazırlık (aşağıda). Ücretsiz bir maymun modeliyle deneme. | Yok |
 | **M2 ekip testi** | En az bir gece oynanır. Devam / değiştir / bırak kararı. | Yok |
-| **M3b** | Karakter (sipariş ya da paket). Tek maymun oyunda: ağız, aksesuarlar, birkaç animasyon. | Var |
+| **M3b** | Karakter (sipariş ya da paket). Tek maymun oyunda: ağız, aksesuarlar, birkaç animasyon. Sipariş paketi hazır: [m3b-karakter.md](m3b-karakter.md). | Var |
 | **M3c** | Oda ve ışık, masa üstü nesneleri. | Var |
 | **M3d** | Hesap Günü sahnesi, ses ve müzik, arayüz teması. | Var |
 | **M3e** | Steam sayfası: ücret, görseller, metin, "Yakında" sayfası. Kapsül siparişi. | Var |
@@ -231,4 +238,6 @@ Kararı ve gerekçesi: [ADR-0003](adr/0003-maymun-modeli-sozlesmesi.md). Sanatç
 **Kalan (ekipte):**
 - Referans panosu ve görsel yön kararı (ADR-0004).
 - Şartnamenin Kerem Gönç'le gözden geçirilmesi: özellikle denetçi şapkasının tasarımı ve animasyon listesi.
-- Mixamo ya da Quaternius animasyonlarının test maymununa aktarılması. İskelet adları uyumlu; denemesi M3b'de, gerçek modelle.
+- ~~Mixamo ya da Quaternius animasyonlarının test maymununa aktarılması.~~
+  - M3b'de Quaternius ile denendi. Aktarma çalışıyor, ama hazır oturma klipleri masamıza uymuyor.
+  - Ayrıntı: [m3b-karakter.md](m3b-karakter.md#hazır-animasyon-denemesi).

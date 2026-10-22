@@ -36,6 +36,7 @@ func test_check_finds_a_broken_model() -> void:
 	var text := "\n".join(check.errors)
 	for expected: String in ["Eksik kemik: Hips", "jaw_open", "Animasyon yok", "acc_glasses", "auditor_hat", "Boy 0.50 m"]:
 		assert_true(expected in text, "reports %s in:\n%s" % [expected, text])
+	assert_true("\n".join(check.warnings).contains("Bone Map"), "warns that the skeleton was imported without a bone map")
 
 
 func test_check_finds_a_model_facing_backwards() -> void:

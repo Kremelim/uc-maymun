@@ -187,13 +187,21 @@ Kerem Ataç'ın Windows'ta yapacağı adımlar.
 
 **2. İçe aktar.** Godot editörünü aç. Dosya kendiliğinden içe aktarılır; sağ altta ilerleme çubuğu görünür.
 
-**3. Kemik adları Mixamo ya da başka bir düzendeyse eşle:**
+**3. Kemikleri eşle (her modelde, adlar zaten doğru olsa da):**
+
+Neden: Eşleme açıkken Godot iskeleti `%GeneralSkeleton` adlı tek tip bir iskelete çevirir. Böylece bir modelin animasyonları başka bir modelde de oynar: dört varyant ya da hazır bir animasyon paketi.
+
 1. FileSystem'de `.glb`'ye çift tıkla. **Advanced Import Settings** açılır.
 2. Soldaki ağaçta **Skeleton3D**'yi seç.
 3. Sağda **Retarget → Bone Map** satırında **New BoneMap**'e, sonra oluşan BoneMap'e tıkla.
-4. **Profile → New SkeletonProfileHumanoid**. Godot Mixamo adlarını kendisi eşler. Yeşil noktalar eşlenen kemikler.
-5. **Rename Bones** açık kalsın.
-6. **Reimport**.
+4. **Profile → New SkeletonProfileHumanoid**.
+   - Godot adları kendisi eşlemeye çalışır (Mixamo adlarını da).
+   - Yeşil noktalar eşlenen kemikler. Kırmızı kalan zorunlu kemik varsa listeden elle seç.
+5. **Rename Bones** ve **Make Unique** açık kalsın (varsayılan).
+6. **Rest Fixer → Fix Silhouette → Enable**'ı aç. A-poz ve T-poz modeller arasında animasyon aktarmak için gerekli.
+7. **Reimport**.
+
+Örnek: test maymunu böyle ayarlı (`assets/monkeys/test_monkey.glb.import`, eşleme `assets/monkeys/humanoid_bone_map.tres`). Kontrol aracı eşleme açılmamışsa uyarır.
 
 **4. Kontrol aracını çalıştır.** Repo kökünde, bir terminalde:
 
